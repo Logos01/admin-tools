@@ -1,7 +1,51 @@
-function ipprint(){ LST=$@ ; ( [ -e "$LST" ] && cat $LST ; [ ! -e "$LST" ] && for i in $LST ; do echo $i ; done ) | while read host ; do echo -en "$host:\t$(dig +short $host.company.com)\n" ; done ;  }
+function ipprint(){ 
+  ## Prints in "hostname:	###.###.###.###" format the string of hosts or file hosts (newline delimited) passed.
+  LST=$@   
+  ( \
+    [ -e "$LST" ] && cat $LST \
+    || [ ! -e "$LST" ] && for i in $LST ; do \
+      echo $i ;\
+     done\
+  ) | while read host ; do 
+  echo -en "$host:\t$(dig +short $host.company.com)\n" 
+  done 
+}
 
-function ksmtop(){ (cd /sys/kernel/mm/ksm/ ; while true ; do date ; for i in `ls` ; do printf "%-20s %-20s\n" $i `cat $i` ; done ; sleep 2 ; clear ; done) ; }
+function ksmtop(){ 
+  ## Produces live printouts -- column delimited -- of the current KSM metrics, a la 'watch'.
+  cd /sys/kernel/mm/ksm/ 
+  while true ; do 
+    date 
+    for i in `ls` ; do 
+      printf "%-20s %-20s\n" $i `cat $i` 
+    done 
+    sleep 2 
+    clear 
+  done
+}
 
-function inpath(){ for item in $@ ; do echo $PATH | awk -F':' '{ for (i=2 ; i<=NF ; i++) print $i ; }' | while read line ; do ls $line | grep $item ; done ; done ; }
+function inpath(){ 
+  ## Prints all filenames that match the regex passed that are currently located anywhere in $PATH.
+  for item in $@ ; do 
+    echo $PATH | awk -F':' '{ for (i=2 ; i<=NF ; i++) print $i ; }' | while read line ; do 
+      ls $line | grep $item 
+      done 
+    done 
+}
 
+## Prints out in largest-> smallest by human-readable format the sizes of all files(and directories) in the current directory.
 function du_by_size(){ du -ks * | sort -nr | cut -f2 | xargs du -hs ; }
+
+function convert_path_to_string_subs () { 
+  ## Converts a path argument into a series of string substitutions to reflect every directory leading up to the final element of the path.
+  # /path/to/dir becomes /path{'',/to{'',/dir}}
+  arr=($(echo $1 | tr "/" "\n")) 
+  echo -en "/${arr[0]}" 
+  for x in ${arr[@]:1} ; do 
+    echo -en "{'',/$x" 
+  done
+  for x in ${arr[@]:1} ; do
+    echo -en "}"
+  done
+  echo ''
+}
