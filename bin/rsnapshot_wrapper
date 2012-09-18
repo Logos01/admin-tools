@@ -32,7 +32,6 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/i
   	# 'needs' sets to '1' any interval.0 value which is older than its interval.
   	for interval in ${intervals[@]}; do 
   		to_check=${interval}".0"
-		echo ${ages[$to_check]}
   		if [ ${ages[$to_check]} -gt ${old[$interval]} ] ; then
   			needs[$interval]="1"
   		fi
@@ -44,7 +43,6 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/i
   	for interval in ${intervals[@]} ; do
   	        if [ ${needs[$interval]} -eq "1" ] ; then
                   	nohup rsnapshot $interval && exit 0 &
-			echo ''
   	        fi
 		if [ ${needs[$interval]} -eq "1" ] && [ $interval != "hourly" ] ; then
 			sleep 60
@@ -55,9 +53,16 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/i
   	## Cleans up old rsnapshot instances.
   	# Maximum duration of 3 hours.
   	rsnapshot_pid=$(/usr/local/bin/pstree $(pgrep perl) | awk '/rsnapshot/ {print $2}' )
-  	sleep $(( ${old[hourly]} * 3 )) 
+  	[ "$rsnapshot_pid" = "|" ] || sleep $(( ${old[hourly]} * 3 )) 
   	new_rsnapshot_pid=$(/usr/local/bin/pstree $(pgrep perl) | awk '/rsnapshot/ {print $2}' )
-  	[ "$rsnapshot_pid" = "$new_rsnapshot_pid" ] && kill -9 $rsnapshot_pid 
+	case $rsnapshot_pid in
+		[0-9]*)
+  			[ "$rsnapshot_pid" = "$new_rsnapshot_pid" ] && kill -9 $rsnapshot_pid
+			;;
+		*)
+			exit 0
+			;;
+	esac
   }
 
 ##-- End Functions --##
