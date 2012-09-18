@@ -1,0 +1,73 @@
+#!/bin/bash
+###################################
+# Written 2012-09-10 by Logos01
+# Function: Replicates the CentOS repositories to /srv/nfs/CentOS
+# Excludes sub-repos listed in "exclude_array".
+# Includes CentOS versions listed in "versions" (x86_64 &i386).
+#
+# Usage: "centos_repo [{-d,--debug}]"
+# "debug" mode shows rsync stdout and stderr.
+#
+###################################
+
+source /etc/bashrc
+
+##-- CONFIGURATION --##
+
+args=$@
+
+versions=(\
+ "5.8"\
+ "6.3"\
+)
+exclude_array=(\
+ "local*"\
+ "isos"\
+ "centosplus"\
+ "addons"\
+ "fasttrack"\
+ "extras"\
+)
+for exclude in "${exclude_array[@]}"; do EXCLUDES="${EXCLUDES} --exclude ${exclude}" ; done
+
+##-- END CONFIGURATION --##
+##-- FUNCTIONS --##
+error(){
+  local PARENT_LINENO="$1" ; local MESSAGE="$2" ; local CODE="${3:-1}"
+  if [[ -n "$MESSAGE" ]] ; then
+    echo "Error on or near line ${PARENT_LINENO}: ${MESSAGE}; exiting with status ${CODE}"
+  else
+    echo "Error on or near line ${PARENT_LINENO}; exiting with status ${CODE}"
+  fi
+  exit "${CODE}"
+}
+replicate(){ 
+  if [ $DEBUG -eq 1 ] ; then
+    RSYNC="/usr/bin/rsync -avSHP --delete ${EXCLUDES} rsync://linux.mirrors.es.net/centos/$1/ /srv/nfs/CentOS/$1/"
+  else
+    RSYNC="/usr/bin/rsync -aqSHP --delete ${EXCLUDES} rsync://linux.mirrors.es.net/centos/$1/ /srv/nfs/CentOS/$1/"
+  fi
+  $RSYNC
+}
+toggle_debug(){
+  DEBUG=0
+  for arg in "${args[@]}"; do
+    [ "$arg" = "-d" ] && DEBUG=1
+    [ "$arg" = "--debug" ] && DEBUG=1
+  done
+  export DEBUG
+}
+
+##-- END FUNCTIONS --##
+##-- RUNTIME --##
+
+trap 'error ${LINENO}' ERR
+toggle_debug
+cd /srv/nfs
+
+for ver in "${versions[@]}"; do 
+  [ -d ./CentOS/$ver/ ] && replicate $ver || exit $?
+done
+
+exit 0 
+##-- END RUNTIME --##

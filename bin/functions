@@ -1,0 +1,7 @@
+function ipprint(){ LST=$@ ; ( [ -e "$LST" ] && cat $LST ; [ ! -e "$LST" ] && for i in $LST ; do echo $i ; done ) | while read host ; do echo -en "$host:\t$(dig +short $host.company.com)\n" ; done ;  }
+
+function ksmtop(){ (cd /sys/kernel/mm/ksm/ ; while true ; do date ; for i in `ls` ; do printf "%-20s %-20s\n" $i `cat $i` ; done ; sleep 2 ; clear ; done) ; }
+
+function inpath(){ for item in $@ ; do echo $PATH | awk -F':' '{ for (i=2 ; i<=NF ; i++) print $i ; }' | while read line ; do ls $line | grep $item ; done ; done ; }
+
+function du_by_size(){ du -ks * | sort -nr | cut -f2 | xargs du -hs ; }
