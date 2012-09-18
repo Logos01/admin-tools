@@ -1,5 +1,5 @@
 #!/usr/local/bin/bash
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/ian/bin
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/logos/bin
 
 ##-- Configuration --##
 
