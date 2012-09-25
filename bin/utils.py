@@ -82,7 +82,7 @@ class shell:
       for result in sendpipe.communicate(input=command)[0]:
         for line in result.split('\n'):
           if not len(line) == 0:
-            output.append(line)
+            output += [line]
     self.output = output
     return self.output
 
