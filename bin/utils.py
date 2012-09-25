@@ -76,13 +76,12 @@ class shell:
     if not noerrval:
       for result in sendpipe.communicate(input=command):
         for line in result.split('\n'):
-          if not len(line) == 0:
+          if len(line):
             output.append(line)
     if noerrval:
-      for result in sendpipe.communicate(input=command)[0]:
-        for line in result.split('\n'):
-          if not len(line) == 0:
-            output += [line]
+      for result in sendpipe.communicate(input=command)[0].split('\n'):
+        if len(result):
+          output.append(result)
     self.output = output
     return self.output
 
