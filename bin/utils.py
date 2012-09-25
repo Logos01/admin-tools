@@ -55,13 +55,12 @@ class shell:
     runpipe = Popen(command,stdout=PIPE,stderr=PIPE,**self.options)
     if noerrval:
       for result in runpipe.communicate()[0].split('\n'):
-        for line in result.split('\n'):
-          if not len(line) == 0:
-            output.append(line)
+        if len(result):
+            output.append(result)
     if not noerrval:
       for result in runpipe.communicate():
         for line in result.split('\n'):
-          if not len(line) == 0:
+          if len(line):
             output.append(line)
     self.output = output
     return self.output
