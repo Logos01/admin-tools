@@ -49,3 +49,12 @@ function convert_path_to_string_subs () {
   done
   echo ''
 }
+
+function arg_check(){
+  ## Checks for presence of specified argument within given list of args.
+  # Usage: arg_check '--long|-l' ${array[@]}
+  # Returns "0" if argument is found.
+  local check_args=($@) 
+  echo ${check_args[@]:1} | egrep -q "(${check_args[0]})"
+  echo $? 
+}

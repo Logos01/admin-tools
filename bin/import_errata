@@ -1,0 +1,99 @@
+#!/bin/bash
+##############################################################
+#
+# Written 2012-09-25 by Logos01
+# Imports CentOS errata into Spacewalk.
+# Usage: /usr/local/bin/import_errata {-d|--debug} {-v|--verbose} {-p|--publish}
+# (If no arguments given, script will presume intent to publish errata normally.)
+#
+##############################################################
+
+
+set -e
+
+##-- CONFIGURATION --##
+  arg_check(){
+    local check_args=($@)
+    echo ${check_args[@]:1} | egrep -q "(${check_args[0]})" ; echo $?
+  }
+
+  args=($@)
+  
+  if [ "$(echo ${args[@]})" = "" ] ; then
+    args=("--publish")
+  fi
+  
+  if [ "$(arg_check '--verbose|-v ' ${args[@]})" = "0" ] ; then
+    set -v
+  fi
+  if [ "$(arg_check '--debug|-d ' ${args[@]})" = "0" ] ; then
+    set -x
+  fi
+  
+  if [ "$(arg_check '--help|-h ' ${args[@]})" = "0" ] ; then
+    echo "Usage: /usr/local/bin/import_errata {-d|--debug} {-v|--verbose} {-p|--publish}"
+    echo "      If no arguments given, --publish is assumed."
+    echo "      Imports CentOS errata into Spacewalk server."
+  fi
+  
+  export PATH=/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+  export SPACEWALK_USER=`sed -n '1p' /etc/spacewalk`
+  export SPACEWALK_PASS=`sed -n '2p' /etc/spacewalk`
+  
+##-- END CONFIGURATION --##
+
+##-- FUNCTIONS --##
+
+  pulldown_file(){
+    ## Pulls down errata.latest.xml into expected location.
+    local pulldown_args=($@)
+    export http_proxy=`cat /etc/secure/proxy_file`
+    export HTTP_PROXY=$HTTP_PROXY
+    if [ "$(arg_check '--debug|-d ' ${pulldown_args[@]})" = "0" ] ; then
+      WGET="wget -v -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
+    else 
+      WGET="wget -q -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
+    fi
+    $WGET
+  }
+  
+  import_errata(){
+    ## Configures invocation of errata-import script based on args and executes.
+    local import_args=($@)
+    import_flags=(\
+     "--errata /tmp/errata.latest.xml"\
+     "--security"\
+     "--enhancement"\
+     "--bugfix"\
+     ) 
+  
+    if [ "$(arg_check '--publish|-p ' ${import_args[@]})" = "0" ] ; then
+      import_flags=( ${import_flags[@]} "--publish" )
+    fi
+    if [ "$(arg_check '--debug|-d ' ${import_args[@]})" = "0" ] ; then
+      import_flags=( ${import_flags[@]} "--debug" )
+    fi
+  
+    IMPORT="errata-import.pl --server spacewalk.virt.net"
+    for val in ${import_flags[@]}; do 
+      IMPORT="$IMPORT "${val}
+    done
+  
+    if [ "$(arg_check '--debug|-d ' ${import_args[@]})" = "0" ] ; then
+      IMPORT="$IMPORT 2>&1"
+    else 
+      IMPORT="$IMPORT 1>/dev/null"
+    fi
+  
+    $IMPORT
+  }
+
+##-- END FUNCTIONS --##
+
+##-- RUNTIME --##
+
+  pulldown_file ${args[@]}
+  import_errata ${args[@]}
+
+
+##-- END RUNTIME --##
