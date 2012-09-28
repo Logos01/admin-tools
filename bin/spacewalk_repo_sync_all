@@ -1,0 +1,75 @@
+#!/bin/bash
+#######################################################
+#
+# Written 2012-09-23 by Logos01
+# Synchronizes all CentOS repositories in use by Spacewalk.
+# Usage: /usr/local/bin/spacewalk_repo_sync_all {--debug|-d} 
+#
+#######################################################
+
+##--    CONFIGURATION    --##
+set -e
+
+
+
+
+http_proxy=$(/bin/cat /etc/secure/proxy_file)
+HTTP_PROXY=$http_proxy
+export http_proxy ; export HTTP_PROXY
+
+vers=(\
+ "5"\
+ "6"\
+ )
+
+arches=(\
+ "i386"\
+ "x86_64"\
+)
+
+repos=(\
+ "os"\
+ "updates"\
+ "contrib"\
+)
+
+##--   END CONFIGURATION    --##
+
+##--     FUNCTIONS     --##
+
+function arg_check(){
+  local check_args=($@)
+  echo ${check_args[@]:1} | egrep -q "(${check_args[0]})"
+}
+
+
+##--   END FUNCTIONS   --##
+
+##--        RUNTIME          --##
+
+if $(arg_check '--help|-h' $@)  ; then
+  echo "/usr/local/bin/spacewalk_repo_sync_all  {--debug|-d} {--help|-h}"
+  echo "Updates Spacewalk all CentOS repositories configured inside script."
+  echo "See /usr/bin/spacewalk-repo-sync -h | man spacewalk-repo-sync for more info."
+  exit 0
+fi
+
+if $(arg_check '--debug|-d' $@) ; then
+  DEBUG=1 ; set -x
+else
+  DEBUG=0 ; Q="-q"
+fi
+
+for v in ${vers[@]}; do
+  for a in ${arches[@]} ; do
+    [ "$a" = "i386" ] && b=32
+    [ "$a" = "x86_64" ] && b=64
+    for repo in ${repos[@]}; do
+      mirror=$(curl -s 'http://mirrorlist.centos.org/?release='$v'&arch='$a'&repo='$repo | grep -v 'ftp' | head -1)
+      /usr/bin/spacewalk-repo-sync $Q -c base-$v-$b -u $mirror
+      [ "$a" = "x86_64" ] && /usr/bin/spacewalk-repo-sync $Q -c base-$v-$b -u $(echo $mirror | sed 's/x86_64/i386/')
+    done
+  done
+done
+
+##--       END RUNTIME       --##

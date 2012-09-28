@@ -12,37 +12,30 @@
 set -e
 
 ##-- CONFIGURATION --##
-  arg_check(){
-    local check_args=($@)
-    echo ${check_args[@]:1} | egrep -q "(${check_args[0]})" ; echo $?
-  }
 
-  args=($@)
-  
-  if [ "$(echo ${args[@]})" = "" ] ; then
-    args=("--publish")
-  fi
-  
-  if [ "$(arg_check '--verbose|-v ' ${args[@]})" = "0" ] ; then
-    set -v
-  fi
-  if [ "$(arg_check '--debug|-d ' ${args[@]})" = "0" ] ; then
-    set -x
-  fi
-  
-  if [ "$(arg_check '--help|-h ' ${args[@]})" = "0" ] ; then
-    echo "Usage: /usr/local/bin/import_errata {-d|--debug} {-v|--verbose} {-p|--publish}"
-    echo "      If no arguments given, --publish is assumed."
-    echo "      Imports CentOS errata into Spacewalk server."
-  fi
-  
+
+  ## Environment preparation
+  #- 
   export PATH=/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
   export SPACEWALK_USER=`sed -n '1p' /etc/spacewalk`
   export SPACEWALK_PASS=`sed -n '2p' /etc/spacewalk`
-  
+  #-  
+
 ##-- END CONFIGURATION --##
 
 ##-- FUNCTIONS --##
+  usage(){
+    echo "Usage: /usr/local/bin/import_errata {-d|--debug} {-v|--verbose} {-p|--publish}"
+    echo "      If no arguments given, --publish is assumed."
+    echo "      Imports CentOS errata into Spacewalk server."
+    exit 0
+  }
+  
+  arg_check(){
+    ## Checks array ($2) for regex in $1
+    local check_args=($@)
+    echo ${check_args[@]:1} | egrep -q "(${check_args[0]})"
+  }
 
   pulldown_file(){
     ## Pulls down errata.latest.xml into expected location.
@@ -67,23 +60,17 @@ set -e
      "--bugfix"\
      ) 
   
-    if [ "$(arg_check '--publish|-p ' ${import_args[@]})" = "0" ] ; then
-      import_flags=( ${import_flags[@]} "--publish" )
-    fi
-    if [ "$(arg_check '--debug|-d ' ${import_args[@]})" = "0" ] ; then
-      import_flags=( ${import_flags[@]} "--debug" )
-    fi
+    $(arg_check '--publish|-p ' ${import_args[@]}) && import_flags=( ${import_flags[@]} "--publish" )
+    $(arg_check '--debug|-d ' ${import_args[@]}) && import_flags=( ${import_flags[@]} "--debug" )
   
     IMPORT="errata-import.pl --server spacewalk.virt.net"
     for val in ${import_flags[@]}; do 
       IMPORT="$IMPORT "${val}
     done
   
-    if [ "$(arg_check '--debug|-d ' ${import_args[@]})" = "0" ] ; then
-      IMPORT="$IMPORT 2>&1"
-    else 
-      IMPORT="$IMPORT 1>/dev/null"
-    fi
+    $(arg_check '--debug|-d ' ${import_args[@]}) \
+    && IMPORT="$IMPORT 2>&1" \
+    || IMPORT="$IMPORT 1>/dev/null"  
   
     $IMPORT
   }
@@ -91,6 +78,15 @@ set -e
 ##-- END FUNCTIONS --##
 
 ##-- RUNTIME --##
+
+  ## Argument handling
+  #-
+  args=($@)
+  if [ "$(echo ${args[@]})" = "" ] ; then args=("--publish") ; fi
+  $(arg_check '--verbose|-v ' ${args[@]}) && set -v
+  $(arg_check '--debug|-d ' ${args[@]}) && set -x  
+  $(arg_check '--help|-h ' ${args[@]}) && usage
+  #-
 
   pulldown_file ${args[@]}
   import_errata ${args[@]}
