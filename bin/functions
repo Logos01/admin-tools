@@ -55,6 +55,5 @@ function arg_check(){
   # Usage: arg_check '--long|-l' ${array[@]}
   # Returns "0" if argument is found.
   local check_args=($@) 
-  echo ${check_args[@]:1} | egrep -q "(${check_args[0]})"
-  echo $? 
+  /bin/echo ${check_args[@]:1} | /bin/egrep -q "(${check_args[0]})"
 }
