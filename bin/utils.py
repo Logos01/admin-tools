@@ -43,7 +43,19 @@ class shell:
       self.options = {}
 
     self.output = 'NULL'
-  
+
+  def return_output(self,result,noerrval):
+    integer = 0
+    output = []
+    for field in result:
+      output += ['NULL']
+      field = field.split('\n')
+      field = [ x for x in field if len(x) ]
+      output[integer] = field
+      integer += 1
+    if noerrval: return output[0]
+    if not noerrval: return output
+
   def run(self):
     command = self.command
     delnoerr = False ; shellval = False ; noerrval = True ; output= []
@@ -53,36 +65,22 @@ class shell:
     if delnoerr: del self.options['noerr']
     if not shellval: command = shlex.split(command)
     runpipe = Popen(command,stdout=PIPE,stderr=PIPE,**self.options)
-    if noerrval:
-      for result in runpipe.communicate()[0].split('\n'):
-        if len(result):
-            output.append(result)
-    if not noerrval:
-      for result in runpipe.communicate():
-        for line in result.split('\n'):
-          if len(line):
-            output.append(line)
-    self.output = output
-    return self.output
+    result = runpipe.communicate()
+    output = self.return_output(result,noerrval)
+    return output
 
   def send(self):
+    intr = 0
+    output = []
     command = self.command ; remote = self.remote
     delnoerr = False ; noerrval = True ; output = []
     for key in self.options.keys():
       if key == 'noerr': noerrval = self.options['noerr'] ; delnoerr = True
     if delnoerr: del self.options['noerr']
     sendpipe=Popen(remote,shell=True,stdin=PIPE,stdout=PIPE,stderr=PIPE,**self.options)
-    if not noerrval:
-      for result in sendpipe.communicate(input=command):
-        for line in result.split('\n'):
-          if len(line):
-            output.append(line)
-    if noerrval:
-      for result in sendpipe.communicate(input=command)[0].split('\n'):
-        if len(result):
-          output.append(result)
-    self.output = output
-    return self.output
+    result = sendpipe.communicate(input=command)
+    output = self.return_output(result,noerrval)
+    return output
 
   def script(self):
     self.script = []
