@@ -69,36 +69,29 @@ print EMAIL "Content-Disposition: inline;\n";
 print EMAIL "Content-Type: text/plain;\n";
 print EMAIL "\n$body\n";
 foreach my $file ( @files ){
-  print EMAIL "--ATTACHMENT-BOUNDARY\n";
+  my $mimetype = `file --mime $file | cut -d' ' -f2 | tr -d '\\n'`;
+  $mimetype =~ s/$/;/;
+  print EMAIL "\n--ATTACHMENT-BOUNDARY\n";
   print EMAIL "Content-Disposition: attachment;\n";
-  my $nextline = "\tfilename=" . '"' . $file . '.gz"' . "\n";
+  my $nextline = "\tfilename=" . '"' . $file . '"' . "\n";
   print EMAIL "$nextline";
-  print EMAIL "Content-Type: application/x-gzip;\n";
+  print EMAIL "Content-Type: $mimetype";
   $nextline =~ s/filename/name/;
   print EMAIL "$nextline";
-  print EMAIL "Content-Transfer-Encoding: base64\n";
-  my $ret = `cp $file /tmp/$file ; cd /tmp ; gzip $file`;
-  print $ret;
-  if ($ret) {
-    print "gzip of $file failed. Exiting.\n";
-    exit(300);
-  }
-  my $base64 = `base64 /tmp/$file.gz`;
+  print EMAIL "Content-Transfer-Encoding: base64;\n";
+  my $base64 = `base64 $file`;
   $base64 =~ s/\n//g;
   print EMAIL "\n$base64\n";
-  $ret = `rm "/tmp/$file.gz"`;
-  if ($ret) {
-    print "could not remove /tmp/$file.gz. Exiting.\n";
-    exit(400);
-  }
 }
 print EMAIL "\n--ATTACHMENT-BOUNDARY--\n";
-print $email;
-
-open(SENDCOMM,"|sendmail -t");
-print SENDCOMM $email;
-
+if ($debug) { 
+  print $email;
+ }
+else{
+  open(SENDCOMM,"|sendmail -t");
+  print SENDCOMM $email;
+  close SENDCOMM;
+}
 close EMAIL;
-close SENDCOMM;
 
 exit(0);
