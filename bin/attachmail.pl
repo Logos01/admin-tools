@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
 use Getopt::Long;
-use Error qw(:try);
 
 our ($to, $sub, $from, @files, $body);
 our ($help, $debug);
