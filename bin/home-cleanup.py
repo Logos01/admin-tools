@@ -83,8 +83,8 @@ def run_commands(*commands):
 
 def correct_home_directory_ownership(key,values):
   (homeDir, uid, gid) = values
-  setfacl_cmd = "setfacl -R -d -m u:" + uid + ":rwx " + key
-  chown_cmd = "chown -R " + uid + "." + gid + " " + key
+  setfacl_cmd = "setfacl -R -d -m u:" + uid + ":rwx " + homeDir
+  chown_cmd = "chown -R " + uid + "." + gid + " " + homeDir
   run_commands(setfacl_cmd,chown_cmd)
 
 def age_of(tarball):
