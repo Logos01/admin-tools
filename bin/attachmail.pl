@@ -50,6 +50,8 @@ if ( $debug ) {
 if ( ! $from ) {
   my $sender = `whoami`;
   my $host = `hostname`;
+  $sender =~ s/\n//;
+  $host =~ s/\n//;
   $from = $sender . '@' . $host;
 }
 
