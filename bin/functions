@@ -1,3 +1,5 @@
+#!/bin/bash 
+
 function ipprint(){ 
   ## Prints in "hostname:	###.###.###.###" format the string of hosts or file hosts (newline delimited) passed.
   LST=$@   
