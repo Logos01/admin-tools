@@ -1,6 +1,7 @@
 #!/bin/bash
 ###################################
 # Written 2012-09-10 by Logos01
+# Modified 2012-11-12 - Revised rsync host to be dynamic.
 # Function: Replicates the CentOS repositories to /srv/nfs/CentOS
 # Excludes sub-repos listed in "exclude_array".
 # Includes CentOS versions listed in "versions" (x86_64 &i386).
