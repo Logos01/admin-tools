@@ -17,6 +17,7 @@ set -e
   ## Environment preparation
   #- 
   export PATH=/usr/lib64/qt-3.3/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+  # Where "/etc/spacewalk" is a file containing two lines: line 1 is username; line 2 is password.
   export SPACEWALK_USER=`sed -n '1p' /etc/spacewalk`
   export SPACEWALK_PASS=`sed -n '2p' /etc/spacewalk`
   #-  

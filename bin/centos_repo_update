@@ -1,6 +1,7 @@
 #!/bin/bash
 ###################################
 # Written 2012-09-10 by Logos01
+# Modified 2012-11-12 - Revised rsync host to be dynamic.
 # Function: Replicates the CentOS repositories to /srv/nfs/CentOS
 # Excludes sub-repos listed in "exclude_array".
 # Includes CentOS versions listed in "versions" (x86_64 &i386).
@@ -43,9 +44,9 @@ error(){
 }
 replicate(){ 
   if [ $DEBUG -eq 1 ] ; then
-    RSYNC="/usr/bin/rsync -avSHP --delete ${EXCLUDES} rsync://linux.mirrors.es.net/centos/$1/ /srv/nfs/CentOS/$1/"
+    RSYNC="/usr/bin/rsync -avSHP --delete ${EXCLUDES} msync.centos.org::CentOS/$1 /srv/nfs/CentOS/"
   else
-    RSYNC="/usr/bin/rsync -aqSHP --delete ${EXCLUDES} rsync://linux.mirrors.es.net/centos/$1/ /srv/nfs/CentOS/$1/"
+    RSYNC="/usr/bin/rsync -aqSHP --delete ${EXCLUDES} msync.centos.org::CentOS/$1 /srv/nfs/CentOS/"
   fi
   $RSYNC
 }
