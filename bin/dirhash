@@ -1,0 +1,13 @@
+#!/bin/bash
+
+dir=$1
+(\
+  find "$dir" -type f |\
+  while read f; do \
+    md5sum "$f";\
+  done;\
+  find "$dir" -type d |\
+  sed 's#/$##'\
+) |\
+LC_ALL=C IFS="$(echo -e "\n\r")" sort |\
+md5sum
