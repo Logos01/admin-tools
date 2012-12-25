@@ -23,8 +23,8 @@ from datetime import datetime, timedelta
 ## Declares argument options.
 parser=OptionParser()
 parser.add_option("-d","--debug",action="store_true",dest="debug",help="show stderror and additional information")
-parser.add_option("-v","--verbose",action="store_true",dest="verbose",help="show stdout")
-parser.add_option("--dryrun",action="store_true",dest="dryrun",help="Dry trun. Shows commands to be executed but does not actually perform them.")
+parser.add_option("-v","--verbose",action="store_true",dest="verbose",help="show stdout",default=False)
+parser.add_option("--dryrun",action="store_true",dest="dryrun",help="Dry run. Shows commands to be executed but does not actually perform them.",default=False)
 
 (options, args) = parser.parse_args()
 
@@ -78,13 +78,13 @@ def run_commands(*commands):
       print "%s" % (cmd)
     if not options.dryrun:
       ret = capture_return_status(cmd)
-      print "%s" % (ret)
+      if options.debug or options.verbose: print "%s" % (ret)
       handle_failure(cmd,ret)
 
 def correct_home_directory_ownership(key,values):
   (homeDir, uid, gid) = values
-  setfacl_cmd = "setfacl -R -d -m u:" + uid + ":rwx " + homeDir
-  chown_cmd = "chown -R " + uid + "." + gid + " " + homeDir
+  setfacl_cmd = "setfacl -R -d -m u:" + uid + ":rwx " + key
+  chown_cmd = "chown -R " + uid + "." + gid + " " + key
   run_commands(setfacl_cmd,chown_cmd)
 
 def age_of(tarball):
