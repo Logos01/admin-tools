@@ -6,7 +6,6 @@ use warnings;
 
 use Term::ReadKey;
 use Net::SSH2;
-use File::HomeDir;
 use LWP::Simple;
 use User::pwent;
 
