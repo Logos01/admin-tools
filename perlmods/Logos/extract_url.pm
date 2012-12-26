@@ -9,7 +9,9 @@ sub extract_url {
   my $file=shift;
   my $search=shift;
 
-  open my $fh, '<', $file;
+  if (-e $file){
+    open my $fh, '<', $file;
+  };
 
   my @urls;
   while (<$fh>) {
