@@ -1,6 +1,7 @@
 package Logos::extract_url;
 
 use Exporter;
+use IO;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(extract_url);
@@ -13,7 +14,9 @@ sub extract_url {
 
   if (-e $file){
     open $fh, '<', $file;
-  };
+  } else { 
+    open $fh, '<', \$file;
+  }
   
   my @urls;
   while (<$fh>) {
