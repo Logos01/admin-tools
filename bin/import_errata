@@ -124,20 +124,10 @@ set -e
   ## Argument handling
   #-
   args=($@)
-  case ${args[@]} in
-    --verbose*| -v*)
-      set -v
-      ;;
-    --debug*| -d*)
-      set -x
-      ;;
-    --help*| -h*)
-      usage
-      ;;
-    *)
-      args=("--publish")
-      ;;
-   esac
+  $(arg_check '--verbose|-v' ${args[@]}) && set -v
+  $(arg_check '--debug|-d' ${args[@]}) && set -x
+  $(arg_check '--help|--usage|-h' ${args[@]}) && usage
+  [ "$(echo ${args[@]})" = "" ] && args=("--publish")
   #-
 
   environment_check ${args[@]}
