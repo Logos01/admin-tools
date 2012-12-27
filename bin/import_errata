@@ -6,6 +6,10 @@
 # Usage: /usr/local/bin/import_errata {-d|--debug} {-v|--verbose} {-p|--publish}
 # (If no arguments given, script will presume intent to publish errata normally.)
 #
+# 2012-12-27 - Added logic to check for and pull down the errata-import.pl script
+#              if not already present and executable.
+# 
+#
 ##############################################################
 
 
@@ -44,21 +48,22 @@ set -e
 
   environment_check(){
    local environment_args=($@)
-   if [ ! -z /usr/local/bin/errata-import.pl ] ; then
-    mkdir /tmp/errata 
-    case ${environment_args[@]} in
-    --debug*| -d*)
-      wget -v -O /tmp/errata/ http://cefs.steve-meier.de/errata-import.tar
-      ;;
-    *)
-      wget -q -O /tmp/errata http://cefs.steve-meier.de/errata-import.tar
-      ;;
-    esac
-    cd /tmp/errata ; tar xf errata-import.tar
-    chmod +x errata-import.pl
-    cp /tmp/errata/* /usr/local/bin ; rm -f /usr/local/bin/errata-import.tar
-    cd -
-    rm -rf /tmp/errata
+   if [ ! -x /usr/local/bin/errata-import.pl ] ; then
+     mkdir /tmp/errata 
+     case ${environment_args[@]} in
+       --debug*| -d*)
+         wget -v -O /tmp/errata/ http://cefs.steve-meier.de/errata-import.tar
+         ;;
+       *)
+         wget -q -O /tmp/errata http://cefs.steve-meier.de/errata-import.tar
+         ;;
+     esac
+     cd /tmp/errata ; tar xf errata-import.tar
+     chmod +x errata-import.pl
+      cp /tmp/errata/* /usr/local/bin ; rm -f /usr/local/bin/errata-import.tar
+     cd -
+     rm -rf /tmp/errata
+   fi
   }
   
   arg_check(){
