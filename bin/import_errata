@@ -8,6 +8,7 @@
 #
 # 2012-12-27 - Added logic to check for and pull down the errata-import.pl script
 #              if not already present and executable.
+# 2012-12-27 - Added import of RHSA OVAL file.
 # 
 #
 ##############################################################
@@ -78,11 +79,14 @@ set -e
     export http_proxy=`cat /etc/secure/proxy_file`
     export HTTP_PROXY=$HTTP_PROXY
     if [ "$(arg_check '--debug|-d ' ${pulldown_args[@]})" = "0" ] ; then
-      WGET="wget -v -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
+      WGET1="wget -v -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
+      WGET2="wget -v -O /tmp/com.redhat.rhsa-all.xml https://www.redhat.com/security/data/oval/com.redhat.rhsa-all.xml"
     else 
-      WGET="wget -q -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
+      WGET1="wget -q -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
+      WGET2="wget -q -O /tmp/com.redhat.rhsa-all.xml https://www.redhat.com/security/data/oval/com.redhat.rhsa-all.xml"
     fi
-    $WGET
+    $WGET1
+    $WGET2
   }
   
   import_errata(){
@@ -90,6 +94,7 @@ set -e
     local import_args=($@)
     import_flags=(\
      "--errata /tmp/errata.latest.xml"\
+     "--rhsa-oval /tmp/com.redhat.rhsa-all.xml"\
      "--security"\
      "--enhancement"\
      "--bugfix"\
