@@ -126,7 +126,6 @@ set -e
   $(arg_check '--help|--usage|-h' ${args[@]}) && usage
   [ "$args" = "" ] && args=("--publish")
   #-
-  echo ${args[@]} 
 
   environment_check ${args[@]}
   pulldown_file ${args[@]}
