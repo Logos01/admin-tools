@@ -31,6 +31,35 @@ set -e
     echo "      Imports CentOS errata into Spacewalk server."
     exit 0
   }
+
+  error(){
+    local PARENT_LINENO="$1" ; local MESSAGE="$2" ; local CODE="${3:-1}"
+    if [[ -n "$MESSAGE" ]] ; then
+      echo "Error on or near line ${PARENT_LINENO}: ${MESSAGE}; exiting with status ${CODE}"
+    else
+      echo "Error on or near line ${PARENT_LINENO}; exiting with status ${CODE}"
+    fi
+    exit "${CODE}"
+  }
+
+  environment_check(){
+   local environment_args=($@)
+   if [ ! -z /usr/local/bin/errata-import.pl ] ; then
+    mkdir /tmp/errata 
+    case ${environment_args[@]} in
+    --debug*| -d*)
+      wget -v -O /tmp/errata/ http://cefs.steve-meier.de/errata-import.tar
+      ;;
+    *)
+      wget -q -O /tmp/errata http://cefs.steve-meier.de/errata-import.tar
+      ;;
+    esac
+    cd /tmp/errata ; tar xf errata-import.tar
+    chmod +x errata-import.pl
+    cp /tmp/errata/* /usr/local/bin ; rm -f /usr/local/bin/errata-import.tar
+    cd -
+    rm -rf /tmp/errata
+  }
   
   arg_check(){
     ## Checks array ($2) for regex in $1
@@ -80,6 +109,8 @@ set -e
 
 ##-- RUNTIME --##
 
+  trap 'error ${LINENO}' ERR
+
   ## Argument handling
   #-
   args=($@)
@@ -89,6 +120,7 @@ set -e
   $(arg_check '--help|-h ' ${args[@]}) && usage
   #-
 
+  environment_check ${args[@]}
   pulldown_file ${args[@]}
   import_errata ${args[@]}
 
