@@ -1,0 +1,67 @@
+#!/bin/bash
+###################################################################
+#
+#  /usr/local/bin/update_firewall
+#  Created 2012-01-03 by Logos01
+#  "Wrapper" for ferm that allows dynamic update of firewall
+#    Against the spamhaus.org drop list.
+#
+#
+###################################################################
+
+set -e
+
+##-- CONFIGURATION --##
+  source /etc/bashrc
+  DEBUG=0
+
+  case $@ in
+    -d*|--debug*)
+      set -x
+      DEBUG=1
+      ;;
+    *)
+      ;;
+  esac
+
+##-- END CONFIGURATION --##
+
+##-- FUNCTIONS --##
+  error(){
+    local PARENT_LINENO="$1" ; local MESSAGE="$2" ; local CODE="${3:-1}"
+    if [[ -n "$MESSAGE" ]] ; then
+      echo "Error on or near line ${PARENT_LINENO}: ${MESSAGE}; exiting with status ${CODE}"
+    else
+      echo "Error on or near line ${PARENT_LINENO}; exiting with status ${CODE}"
+    fi
+    exit "${CODE}"
+  }
+  
+  
+  obtain_droplist(){
+    if [ "$DEBUG" = "1" ] ; 
+      then /usr/bin/wget -v -O - http://www.spamhaus.org/drop/drop.txt
+      else /usr/bin/wget -q -O - http://www.spamhaus.org/drop/drop.txt 2>/dev/null
+    fi
+    
+  }
+  
+  update_firewall(){
+    drop_lines=`echo "$drop_txt" | wc -l`
+    if [ $drop_lines -gt 0 ] ; then
+      /usr/bin/awk -F';' '( $1 != "") {print $1}' /dev/shm/drop.txt > /etc/spammers
+      ferm /etc/ferm/ferm.conf
+    fi
+  }
+  
+##-- END FUNCTIONS --##
+
+##-- RUNTIME --##
+  trap 'error ${LINENO}' ERR
+
+  obtain_droplist > /dev/shm/drop.txt
+  drop_txt=$(cat /dev/shm/drop.txt)
+  update_firewall
+  rm /dev/shm/drop.txt
+
+##-- END RUNTIME --##
