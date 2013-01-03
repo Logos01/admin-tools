@@ -48,17 +48,14 @@ set -e
   }
 
   environment_check(){
-   local environment_args=($@)
+   environment_args=($@)
    if [ ! -x /usr/local/bin/errata-import.pl ] ; then
      mkdir /tmp/errata 
-     case ${environment_args[@]} in
-       --debug*| -d*)
-         wget -v -O /tmp/errata/ http://cefs.steve-meier.de/errata-import.tar
-         ;;
-       *)
-         wget -q -O /tmp/errata http://cefs.steve-meier.de/errata-import.tar
-         ;;
-     esac
+     if $(arg_check '--debug|-d' ${environment_args[@]} ) ; then
+       wget -v -O /tmp/errata/ http://cefs.steve-meier.de/errata-import.tar
+     else 
+       wget -q -O /tmp/errata http://cefs.steve-meier.de/errata-import.tar
+     fi
      cd /tmp/errata ; tar xf errata-import.tar
      chmod +x errata-import.pl
       cp /tmp/errata/* /usr/local/bin ; rm -f /usr/local/bin/errata-import.tar
@@ -69,21 +66,21 @@ set -e
   
   arg_check(){
     ## Checks array ($2) for regex in $1
-    local check_args=($@)
+    check_args=($@)
     echo ${check_args[@]:1} | egrep -q "(${check_args[0]})"
   }
 
   pulldown_file(){
     ## Pulls down errata.latest.xml into expected location.
-    local pulldown_args=($@)
+    pulldown_args=($@)
     export http_proxy=`cat /etc/secure/proxy_file`
     export HTTP_PROXY=$HTTP_PROXY
-    if [ "$(arg_check '--debug|-d ' ${pulldown_args[@]})" = "0" ] ; then
+    if $(arg_check '--debug|-d ' ${pulldown_args[@]}) ; then
       WGET1="wget -v -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
-      WGET2="wget -v -O /tmp/com.redhat.rhsa-all.xml https://www.redhat.com/security/data/oval/com.redhat.rhsa-all.xml"
+      WGET2="wget -v -O /tmp/com.redhat.rhsa-all.xml http://www.redhat.com/security/data/oval/com.redhat.rhsa-all.xml"
     else 
       WGET1="wget -q -O /tmp/errata.latest.xml http://cefs.steve-meier.de/errata.latest.xml"
-      WGET2="wget -q -O /tmp/com.redhat.rhsa-all.xml https://www.redhat.com/security/data/oval/com.redhat.rhsa-all.xml"
+      WGET2="wget -q -O /tmp/com.redhat.rhsa-all.xml http://www.redhat.com/security/data/oval/com.redhat.rhsa-all.xml"
     fi
     $WGET1
     $WGET2
@@ -91,7 +88,7 @@ set -e
   
   import_errata(){
     ## Configures invocation of errata-import script based on args and executes.
-    local import_args=($@)
+    import_args=($@)
     import_flags=(\
      "--errata /tmp/errata.latest.xml"\
      "--rhsa-oval /tmp/com.redhat.rhsa-all.xml"\
@@ -124,20 +121,10 @@ set -e
   ## Argument handling
   #-
   args=($@)
-  case ${args[@]} in
-    --verbose*| -v*)
-      set -v
-      ;;
-    --debug*| -d*)
-      set -x
-      ;;
-    --help*| -h*)
-      usage
-      ;;
-    *)
-      args=("--publish")
-      ;;
-   esac
+  $(arg_check '--verbose|-v' ${args[@]}) && set -v
+  $(arg_check '--debug|-d' ${args[@]}) && set -x
+  $(arg_check '--help|--usage|-h' ${args[@]}) && usage
+  [ "$args" = "" ] && args=("--publish")
   #-
 
   environment_check ${args[@]}
