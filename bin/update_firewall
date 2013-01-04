@@ -12,7 +12,7 @@
 set -e
 
 ##-- CONFIGURATION --##
-  source /etc/bashrc
+  [ -f /etc/bashrc ] && source /etc/bashrc
   DEBUG=0
 
   case $@ in
