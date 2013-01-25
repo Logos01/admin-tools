@@ -12,10 +12,11 @@ set -e
 
 
 
-
-http_proxy=$(/bin/cat /etc/secure/proxy_file)
-HTTP_PROXY=$http_proxy
-export http_proxy ; export HTTP_PROXY
+if [ -f '/etc/secure/proxy_file' ] ; then
+  http_proxy=$(/bin/cat /etc/secure/proxy_file)
+  HTTP_PROXY=$http_proxy
+  export http_proxy ; export HTTP_PROXY
+fi
 
 vers=(\
  "5"\
@@ -28,9 +29,13 @@ arches=(\
 )
 
 repos=(\
- "os"\
- "updates"\
+ "addons"\
+ "centosplus"\
  "contrib"\
+ "extras"\
+ "fasttrack"\
+ "updates"\
+ "os"\
 )
 
 ##--   END CONFIGURATION    --##
@@ -66,8 +71,18 @@ for v in ${vers[@]}; do
     [ "$a" = "x86_64" ] && b=64
     for repo in ${repos[@]}; do
       mirror=$(curl -s 'http://mirrorlist.centos.org/?release='$v'&arch='$a'&repo='$repo | grep -v 'ftp' | head -1)
-      /usr/bin/spacewalk-repo-sync $Q -c base-$v-$b -u $mirror
-      [ "$a" = "x86_64" ] && /usr/bin/spacewalk-repo-sync $Q -c base-$v-$b -u $(echo $mirror | sed 's/x86_64/i386/')
+      if [ "$repo" != "os" ] ; then
+        /usr/bin/spacewalk-repo-sync $Q -c centos${v}-${a}-${repo} -u $mirror
+      else
+        /usr/bin/spacewalk-repo-sync $Q -c centos${v}-${a} -u $mirror
+      fi
+      if [ "$a" = "x86_64" ] ; then
+        if [ "$repo" != "os" ] ; then
+          /usr/bin/spacewalk-repo-sync $Q -c centos${v}-${a}-${repo} -u $(echo $mirror | sed 's/x86_64/i386/')
+        else
+          /usr/bin/spacewalk-repo-sync $Q -c centos${v}-${a} -u $(echo $mirror | sed 's/x86_64/i386/')
+        fi
+      fi
     done
   done
 done
