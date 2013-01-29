@@ -79,7 +79,6 @@ for skey,svalue in systemdict.items():
 
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
 dbtables = cur.fetchall()
-print dbtables
 
 (has_hosts,has_df,has_fdisk) = (0,0,0)
 if dbtables:
