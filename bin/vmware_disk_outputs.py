@@ -102,22 +102,25 @@ cur.execute('CREATE TABLE fdisk_out (Key INTEGER PRIMARY KEY, Hostname TEXT, fdi
 
 for vkey,vvalue in vmdict.items():
   if vvalue == True:
-    hostname = shell('ssh -q HOSTNAME "hostname"'.replace('HOSTNAME',vkey)).run()
-    if hostname:
+    ssh_output = shell('ssh -q HOSTNAME "hostname; echo \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',vkey)).run()
+    if ssh_output:
+      hostname = ssh_output[0]
+      delimita = ssh_output.index('--DELIMITER1')
+      delimit1 = delimita + 1
+      delimitb = ssh_output.index('--DELIMITER2')
+      delimit2 = delimitb - 1
+      delimit3 = delimitb + 1
+      diskfree_out = ssh_output[delimit1:delimit2]
       diskfree_str = ''
-      diskfree_out = shell('ssh -q HOSTNAME "df -h"'.replace('HOSTNAME',vkey)).run()
       for x in diskfree_out:
         diskfree_str = diskfree_str + x + '\n'
       fdisk_str = ''
-      fdisk_out = shell('ssh -q HOSTNAME "fdisk -l"'.replace('HOSTNAME',vkey)).run()
+      fdisk_out = ssh_output[delimit3:]
       for x in fdisk_out:
         fdisk_str = fdisk_str + x + '\n'
-      hostname = '\'HOSTNAME\''.replace('HOSTNAME',vkey)
-      df_out = '''\'\'\'DF_OUT\'\'\''''.replace('DF_OUT',diskfree_str)
-      fdisk_out = '''\'\'\'FDISK_OUT\'\'\''''.replace('FDISK_OUT',fdisk_str)
-      cur.execute('insert into hosts(Hostname) VALUES (%s)' % (hostname))
-      cur.execute('insert into df_out(Hostname,df_out) VALUES (%s,%s)' % (hostname,df_out))
-      cur.execute('insert into fdisk_out(Hostname,fdisk_out) VALUES (%s,%s)' % (hostname,fdisk_out))
+      cur.execute("insert into hosts(Hostname) VALUES ('%s')" % (hostname))
+      cur.execute("insert into df_out(Hostname,df_out) VALUES ('%s','%s')" % (hostname,df_out))
+      cur.execute("insert into fdisk_out(Hostname,fdisk_out) VALUES ('%s','%s')" % (hostname,fdisk_out))
       con.commit()
 
 con.commit()
