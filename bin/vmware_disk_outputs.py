@@ -78,17 +78,17 @@ for skey,svalue in systemdict.items():
     vmdict[skey] = False
 
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-dbtables = cur.fetchone()
-
+dbtables = cur.fetchall()
+print dbtables
 
 (has_hosts,has_df,has_fdisk) = (0,0,0)
 if dbtables:
   for x in dbtables:
-    if re.match('host',x):
+    if re.match('host',x[0]):
       has_hosts = 1
-    if re.match('df_out',x):
+    if re.match('df_out',x[0]):
       has_df = 1
-    if re.match('fdisk_out',x):
+    if re.match('fdisk_out',x[0]):
       has_fdisk = 1
 
 if has_hosts: cur.execute('DROP TABLE hosts;')
@@ -110,14 +110,14 @@ for vkey,vvalue in vmdict.items():
       delimitb = ssh_output.index('--DELIMITER2')
       delimit2 = delimitb - 1
       delimit3 = delimitb + 1
-      diskfree_out = ssh_output[delimit1:delimit2]
-      diskfree_str = ''
-      for x in diskfree_out:
-        diskfree_str = diskfree_str + x + '\n'
-      fdisk_str = ''
-      fdisk_out = ssh_output[delimit3:]
-      for x in fdisk_out:
-        fdisk_str = fdisk_str + x + '\n'
+      df_delimited = ssh_output[delimit1:delimit2]
+      df_out = ''
+      for x in df_delimited:
+        df_out = df_out + x + '\n'
+      fdisk_out = ''
+      fdisk_delimited = ssh_output[delimit3:]
+      for x in fdisk_delimited:
+        fdisk_out = fdisk_out + x + '\n'
       cur.execute("insert into hosts(Hostname) VALUES ('%s')" % (hostname))
       cur.execute("insert into df_out(Hostname,df_out) VALUES ('%s','%s')" % (hostname,df_out))
       cur.execute("insert into fdisk_out(Hostname,fdisk_out) VALUES ('%s','%s')" % (hostname,fdisk_out))
