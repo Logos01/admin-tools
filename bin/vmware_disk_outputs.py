@@ -87,7 +87,9 @@ loopcounter = 0
 for vkey,vvalue in vmdict.items():
   if vvalue == True:
     hostname = vkey
-    ssh_out_dict[hostname] = shell('ssh -oConnectTimeout=2 -q HOSTNAME "hostname; echo \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',hostname)).run()
+    current_run = shell('ssh -oConnectTimeout=2 -q HOSTNAME "hostname; echo \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',hostname),shell=True,noerr=False).run()
+    ssh_out_dict[hostname] = current_run[0]
+    print "%s" % current_run[1]
 
 
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -140,17 +142,29 @@ for ssh_host,ssh_out in ssh_out_dict.items():
     fdisk_delimited = ['']
   df_out = ''
   for x in df_delimited:
+    xloc= df_delimited.index(x)
+    xloc += 1
     df_out = df_out + x + '\n'
-    if re.match('Home',x): lvhome_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('Opt',x): lvroot_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('Redhat',x): lvredhat_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('Root',x): lvroot_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('Tmp',x): lvtmp_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('Usr',x) and not re.match('UsrLocal',x): lvusr_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('UsrLocal',x): lvusrlocal_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('Var',x) and not re.match('VarWWW',x) and not re.match('VarHttpd',x): lvvar_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('VarHttpd',x): lvvarhttpd_insert = df_delimited[df_delimited.index(x)+1]
-    if re.match('VarWWW',x): lvvarwww_insert = df_delimited[df_delimited.index(x)+1]
+    if re.search('Home',x): 
+      lvhome_insert = df_delimited[xloc]
+      print "%s" % (lvhome_insert)
+    if re.search('Opt',x): lvroot_insert = df_delimited[xloc]
+    if re.search('Redhat',x): lvredhat_insert = df_delimited[xloc]
+    if re.search('Root',x): lvroot_insert = df_delimited[xloc]
+    if re.search('Tmp',x): lvtmp_insert = df_delimited[xloc]
+    if re.search('Usr',x):
+      if not re.search('UsrLocal',x): 
+        try: lvusr_insert = df_delimited[xloc]
+        except IndexError: lvusr_insert = x
+    if re.search('UsrLocal',x): lvusrlocal_insert = df_delimited[xloc]
+    if re.search('Var',x):
+      if not re.search('VarWWW',x):
+        if not re.search('VarHttpd',x): 
+          try: lvvar_insert = df_delimited[xloc]
+          except IndexError: print "%s" % df_delimited
+    print "%s" % (lvvar_insert)
+    if re.search('VarHttpd',x): lvvarhttpd_insert = df_delimited[xloc]
+    if re.search('VarWWW',x): lvvarwww_insert = df_delimited[xloc]
   fdisk_out = ''
   for x in fdisk_delimited:
     fdisk_out = fdisk_out + x + '\n'
