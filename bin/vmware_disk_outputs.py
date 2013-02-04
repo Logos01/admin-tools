@@ -135,7 +135,7 @@ for ssh_host,ssh_out in ssh_out_dict.items():
     delimitb = ssh_out.index('--DELIMITER2')
     delimit2 = delimitb - 1
     delimit3 = delimitb + 1
-    df_delimited = ssh_out[delimit1:delimit2]
+    df_delimited = ssh_out[delimit1:delimitb]
     fdisk_delimited = ssh_out[delimit3:]
   except ValueError:
     df_delimited = ['']
@@ -145,24 +145,19 @@ for ssh_host,ssh_out in ssh_out_dict.items():
     xloc= df_delimited.index(x)
     xloc += 1
     df_out = df_out + x + '\n'
-    if re.search('Home',x): 
-      lvhome_insert = df_delimited[xloc]
-      print "%s" % (lvhome_insert)
-    if re.search('Opt',x): lvroot_insert = df_delimited[xloc]
+    if re.search('Home',x): lvhome_insert = df_delimited[xloc]
+    if re.search('Opt',x): lvopt_insert = df_delimited[xloc]
     if re.search('Redhat',x): lvredhat_insert = df_delimited[xloc]
     if re.search('Root',x): lvroot_insert = df_delimited[xloc]
     if re.search('Tmp',x): lvtmp_insert = df_delimited[xloc]
     if re.search('Usr',x):
       if not re.search('UsrLocal',x): 
-        try: lvusr_insert = df_delimited[xloc]
-        except IndexError: lvusr_insert = x
+        lvusr_insert = df_delimited[xloc]
     if re.search('UsrLocal',x): lvusrlocal_insert = df_delimited[xloc]
     if re.search('Var',x):
       if not re.search('VarWWW',x):
         if not re.search('VarHttpd',x): 
-          try: lvvar_insert = df_delimited[xloc]
-          except IndexError: print "%s" % df_delimited
-    print "%s" % (lvvar_insert)
+          lvvar_insert = df_delimited[xloc]
     if re.search('VarHttpd',x): lvvarhttpd_insert = df_delimited[xloc]
     if re.search('VarWWW',x): lvvarwww_insert = df_delimited[xloc]
   fdisk_out = ''
