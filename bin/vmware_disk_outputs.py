@@ -4,8 +4,6 @@ import re
 import sqlite
 import sys
 import getpass
-import threading
-import time
 from optparse import OptionParser
 from utils import shell
 
@@ -89,7 +87,6 @@ for vkey,vvalue in vmdict.items():
     hostname = vkey
     current_run = shell('ssh -oConnectTimeout=2 -q HOSTNAME "hostname; echo \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',hostname),shell=True,noerr=False).run()
     ssh_out_dict[hostname] = current_run[0]
-    print "%s" % current_run[1]
 
 
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
