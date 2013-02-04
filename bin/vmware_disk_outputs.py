@@ -87,7 +87,7 @@ loopcounter = 0
 for vkey,vvalue in vmdict.items():
   if vvalue == True:
     hostname = vkey
-    ssh_out_dict[hostname] = shell('ssh -oConnectTimeout=2 -q HOSTNAME "hostname; \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',hostname)).run()
+    ssh_out_dict[hostname] = shell('ssh -oConnectTimeout=2 -q HOSTNAME "hostname; echo \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',hostname)).run()
 
 
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
