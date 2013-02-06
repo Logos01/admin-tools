@@ -1,6 +1,6 @@
 Storage {
   Name = HOSTNAME
-  Address = 192.168.1.9                # N.B. Use a fully qualified name here
+  Address = SDADDR                # N.B. Use a fully qualified name here
   SDPort = 9103
   Password = "PASSWORD"
   Device = HOSTNAME
