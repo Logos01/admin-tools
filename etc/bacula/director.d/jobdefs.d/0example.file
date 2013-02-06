@@ -1,0 +1,13 @@
+JobDefs {
+  Name = "HOSTNAMEDef"
+  Type = Backup
+  Client = HOSTNAME-fd
+  FileSet = "Full Set"
+  Storage = HOSTNAME
+  Messages = Standard
+  Priority = 10
+  Write Bootstrap = "/var/lib/bacula/%c.bsr"
+  Full Backup Pool = HOSTNAMEFile-Full
+  Differential Backup Pool = HOSTNAMEFile-Diff
+  Incremental Backup Pool = HOSTNAMEFile-Incr
+}

@@ -1,0 +1,10 @@
+Client {
+  Name = HOSTNAME-fd
+  Address = IPADDRESS
+  FDPort = 9102
+  Catalog = MyCatalog
+  Password = "PASSWORD"         # password for FileDaemon 2
+  File Retention = 30 days            # 30 days
+  Job Retention = 6 months            # six months
+  AutoPrune = yes                     # Prune expired Jobs/Files
+}

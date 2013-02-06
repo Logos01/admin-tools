@@ -1,0 +1,47 @@
+Pool {
+  Name = HOSTNAMEFile-Base
+  Pool Type = Backup
+  Recycle = yes                       # Bacula can automatically recycle Volumes
+  AutoPrune = yes                     # Prune expired volumes
+  Volume Retention = 365 days         # one year
+  Maximum Volume Bytes = 100G          # Limit Volume size to something reasonable
+  Maximum Volumes = 365               # Limit number of Volumes in Pool
+  Volume Use Duration = 23h
+  LabelFormat = "${Job}--${Level}--${JobId}--${Year}-${Month}-${Day}"
+}
+
+Pool {
+  Name = HOSTNAMEFile-Full
+  Pool Type = Backup
+  Recycle = yes                       # Bacula can automatically recycle Volumes
+  AutoPrune = yes                     # Prune expired volumes
+  Volume Retention = 60 days         # one year
+  Maximum Volume Bytes = 100G          # Limit Volume size to something reasonable
+  Maximum Volumes = 60               # Limit number of Volumes in Pool
+  Volume Use Duration = 23h
+  LabelFormat = "${Job}--${Level}--${JobId}--${Year}-${Month}-${Day}"
+}
+
+Pool {
+  Name = HOSTNAMEFile-Diff
+  Pool Type = Backup
+  Recycle = yes
+  AutoPrune = yes
+  Volume Retention = 14 days
+  Maximum Volume Bytes = 50G
+  Maximum Volumes = 14
+  Volume Use Duration = 23h
+  LabelFormat = "${Job}--${Level}--${JobId}--${Year}-${Month}-${Day}"
+}  
+
+Pool {
+  Name = HOSTNAMEFile-Incr
+  Pool Type = Backup
+  Recycle = yes
+  AutoPrune = yes
+  Volume Retention = 2 days
+  Maximum Volume Bytes = 20G
+  Maximum Volumes = 12
+  Volume Use Duration = 6h
+  LabelFormat = "${Job}--${Level}--${JobId}--${Year}-${Month}-${Day}-${Hour}"
+}

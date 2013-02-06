@@ -1,0 +1,12 @@
+Job {
+  Name = "HOSTNAME"
+  Base = HOSTNAME
+  Accurate = yes
+  JobDefs = "HOSTNAMEDef"
+  Full Backup Pool = HOSTNAMEFile-Full
+  Differential Backup Pool = HOSTNAMEFile-Diff
+  Incremental Backup Pool = HOSTNAMEFile-Incr
+  Pool = HOSTNAMEFile-Base
+  Schedule = "AllCycle"
+}
+

@@ -1,0 +1,10 @@
+Device {
+  Name = HOSTNAME
+  Media Type = HOSTNAMEFile
+  Archive Device = /zraid0/backups/HOSTNAME/
+  LabelMedia = yes;
+  Random Access = Yes;
+  AutomaticMount = yes;
+  RemovableMedia = no;
+  AlwaysOpen = no;
+}
