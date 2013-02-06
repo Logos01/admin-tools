@@ -1,0 +1,4 @@
+#!/bin/bash
+read -s  -p "Enter password: " PASSPHRASE
+/usr/bin/ldapvi -h ldap -b 'dc=company,dc=com' -D 'uid=user_name,ou=people,o=DOMAIN,dc=company,dc=com' -w "$PASSPHRASE" "($@)" \* accountUnlockTime passwordAllowChangeTime passwordExpirationTime passwordExpWarned passwordHistory passwordPolicySubentry passwordRetryCount retryCountResetTime
+
