@@ -4,6 +4,8 @@ import sqlite
 import sys
 import getpass
 from optparse import OptionParser
+#utils module is expected to be stored in /usr/local/lib/python2.4
+sys.path.append('/usr/local/lib/python2.4/')
 from utils import shell
 
 parser=OptionParser()
@@ -68,13 +70,12 @@ for key, value in systemdict.items():
 
 ssh_out_dict = {}
 ssh_events = []
-loopcounter = 0
 for hostname, value in vmdict:
     if not value:
         continue
 
-    current_run = shell('''ssh -oConnectTimeout=2 -q %s "hostname; echo '--DELIMITER1'; df -h ; echo '--DELIMITER2'; fdisk -l"''' % hostname, shell=True, noerr=False).run()
-    ssh_out_dict[hostname] = current_run[0]
+    current_run = shell('''ssh -oConnectTimeout=2 -q %s "hostname; echo '--DELIMITER1'; df -h ; echo '--DELIMITER2'; fdisk -l"''' % hostname).run()
+    ssh_out_dict[hostname] = current_run
 
 
 cur.execute('CREATE TABLE IF NOT EXISTS hosts (Key INTEGER PRIMARY KEY, Hostname TEXT);')
@@ -116,7 +117,6 @@ for ssh_host, ssh_out in ssh_out_dict.items():
         delimita = ssh_out.index('--DELIMITER1')
         delimit1 = delimita + 1
         delimitb = ssh_out.index('--DELIMITER2')
-        delimit2 = delimitb - 1
         delimit3 = delimitb + 1
         df_delimited = ssh_out[delimit1:delimitb]
         fdisk_delimited = ssh_out[delimit3:]
@@ -124,10 +124,8 @@ for ssh_host, ssh_out in ssh_out_dict.items():
         df_delimited = ['']
         fdisk_delimited = ['']
         
-    df_out = []
     for index, x in enumerate(df_delimited):
         xloc = index + 1
-        df_out.append(x)
         if 'Home' in x: 
             lvhome_insert = df_delimited[xloc]
         if 'Opt' in x: 
@@ -149,7 +147,7 @@ for ssh_host, ssh_out in ssh_out_dict.items():
         if 'VarWWW' in x: 
             lvvarwww_insert = df_delimited[xloc]
 
-    df_out = '\n'.join(df_out)
+    df_out = '\n'.join(df_delimited)
 
     fdisk_out = '\n'.join(fdisk_delimited)
         
