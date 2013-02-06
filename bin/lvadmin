@@ -9,8 +9,12 @@ our $deviceList = getLVMdeviceList();
 
 
 ## Handle Arguments ##
+<<<<<<< HEAD
 our $device ;
 $device = sanitizeDevice(shift);
+=======
+our $device = sanitizeDevice(shift);
+>>>>>>> 1189aee546c22e050c62a107ae94b8272bfc1f1c
 
 if( defined($device) ) {
   # Check device and mountpoint
@@ -295,28 +299,46 @@ sub getMountPoints {
 
 sub getFreeSpace {
   my $mountPoint = shift;
+<<<<<<< HEAD
   my $freeSpace = `df -h "$mountPoint" 2>/dev/null | tail -n 1 | awk '{print \$3}'`;
   if( defined($freeSpace) ) {
     chomp($freeSpace);
     if ( "$freeSpace" ne  "") {
       return $freeSpace ;
     }
+=======
+  my $freeSpace = `df -h "$mountPoint" | tail -n 1 | awk '{print \$3}'`;
+
+  if( defined($freeSpace) ) {
+    chomp($freeSpace);
+    return $freeSpace;
+>>>>>>> 1189aee546c22e050c62a107ae94b8272bfc1f1c
   }
   return "<NA>";
 }
 
 sub sanitizeDevice {
+<<<<<<< HEAD
   
   my $ArgOneIn = shift ;
   if (!defined $ArgOneIn){ return $device; }
   if ( $ArgOneIn =~ m/-/){
+=======
+  my $ArgOneIn = shift ;
+  if ($ArgOneIn =~ m/-/){
+>>>>>>> 1189aee546c22e050c62a107ae94b8272bfc1f1c
     my @ArgOneSplit1 = split(/\//,$ArgOneIn);
     my @ArgOneSplit2 = split(/-/,$ArgOneSplit1[-1]);
     $device = "/dev/$ArgOneSplit2[-2]/$ArgOneSplit2[-1]/";
     return $device
   }
   else {
+<<<<<<< HEAD
    $device = $ArgOneIn ;
    return $device ;
+=======
+    $device = $ArgOneIn;
+    return $device
+>>>>>>> 1189aee546c22e050c62a107ae94b8272bfc1f1c
   }
 }
