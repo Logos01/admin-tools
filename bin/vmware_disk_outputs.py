@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import xmlrpclib
-import re
 import sqlite
 import sys
 import getpass
@@ -16,38 +15,30 @@ parser.add_option("-q","--quiet",action="store_false", dest="verbose", default=T
 
 (options, args) = parser.parse_args()
 
-errquit=''
-toquit = 0
+errquit=[]
 
 if not options.server:
-  errquit = errquit + "Satellite hostname required.\n"
-  toquit = 1
+    errquit.append("Satellite hostname required.")
 if not options.user:
-  errquit = errquit + "Satellite Username required.\n"
-  toquit = 1
+    errquit.append("Satellite Username required.")
 if not options.database:
-  errquit = errquit + "SQLite database filename required.\n"
-  toquit = 1
+    errquit.append("SQLite database filename required.")
 
-if toquit:
-  parser.print_help()
-  parser.error(errquit)
+if errquit:
+    parser.print_help()
+    parser.error('\n'.join(errquit))
 
 
 if not options.password:
-  options.password = getpass.getpass('Enter password for USER: '.replace('USER',options.user))
+    options.password = getpass.getpass('Enter password for %s: ' % options.user)
 
-shell('touch DB'.replace('DB',options.database)).run()
+shell('touch %s' % options.database).run()
 
-try:
-  con = sqlite.connect(options.database) ; cur = con.cursor()
-  cur.execute('SELECT SQLITE_VERSION()') ; data = cur.fetchone()
-  print "SQLite Version: %s" % (data)
-
-except sqlite.Error, e:
-  print "Error %s:" % e.args[0] ; sys.exit(1)
-  parser.print_help()
-
+con = sqlite.connect(options.database)
+cur = con.cursor()
+cur.execute('SELECT SQLITE_VERSION()')
+data = cur.fetchone()
+print "SQLite Version: %s" % (data,)
 
 SATELLITE_URL= 'http://' + options.server + '/rpc/api'
 SATELLITE_LOGIN=options.user
@@ -56,115 +47,121 @@ SATELLITE_PASSWORD=options.password
 client = xmlrpclib.Server(SATELLITE_URL, verbose=0)
 key = client.auth.login(SATELLITE_LOGIN,SATELLITE_PASSWORD)
 
-
 def vmwaretest(id):
-  devices = client.system.getDevices(key,id)
-  is_vmware = 0
-  for device in devices:
-    for dkey,dvalue in device.items():
-      if re.match('VMware',str(dvalue)):
-        is_vmware = 1
-  return is_vmware
+    devices = client.system.getDevices(key,id)
+    is_vmware = 0
+    for device in devices:
+        for value in device.values():
+            if "VMware" in value:
+                return True
+    return False
+
 
 systemdict = {}
-vmdict = {}
-
 systemlist = client.system.listSystems(key)
 for item in systemlist:
-  systemdict[item['name']] = item['id']
+    systemdict[item['name']] = item['id']
 
-for skey,svalue in systemdict.items():
-  if vmwaretest(svalue):
-    vmdict[skey] = True
-  else:
-    vmdict[skey] = False
+vmdict = {}
+for key, value in systemdict.items():
+    vmdict[skey] = vmwaretest(value)
 
 ssh_out_dict = {}
 ssh_events = []
 loopcounter = 0
-for vkey,vvalue in vmdict.items():
-  if vvalue == True:
-    hostname = vkey
-    current_run = shell('ssh -oConnectTimeout=2 -q HOSTNAME "hostname; echo \'--DELIMITER1\'; df -h ; echo \'--DELIMITER2\'; fdisk -l"'.replace('HOSTNAME',hostname),shell=True,noerr=False).run()
+for hostname, value in vmdict:
+    if not value:
+        continue
+
+    current_run = shell('''ssh -oConnectTimeout=2 -q %s "hostname; echo '--DELIMITER1'; df -h ; echo '--DELIMITER2'; fdisk -l"''' % hostname, shell=True, noerr=False).run()
     ssh_out_dict[hostname] = current_run[0]
 
 
-cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
-dbtables = cur.fetchall()
+cur.execute('CREATE TABLE IF NOT EXISTS hosts (Key INTEGER PRIMARY KEY, Hostname TEXT);')
+cur.execute('DELETE FROM hosts;')
 
-(has_hosts,has_df,has_fdisk) = (0,0,0)
-if dbtables:
-  for x in dbtables:
-    if re.match('host',x[0]):
-      has_hosts = 1
-    if re.match('df_out',x[0]):
-      has_df = 1
-    if re.match('fdisk_out',x[0]):
-      has_fdisk = 1
+cur.execute('''CREATE TABLE IF NOT EXISTS df_out (
+    Key INTEGER PRIMARY KEY, 
+    Hostname TEXT, 
+    LogVolHome TEXT, 
+    LogVolOpt TEXT, 
+    LogVolRedhat TEXT, 
+    LogVolRoot TEXT, 
+    LogVolTmp TEXT, 
+    LogVolUsr TEXT, 
+    LogVolUsrLocal TEXT, 
+    LogVolVar TEXT, 
+    LogVolVarHttpd TEXT, 
+    LogVolVarWWW TEXT, 
+    df_out TEXT);''')
+cur.execute('DELETE FROM df_out;')
 
-if has_hosts: cur.execute('DROP TABLE hosts;')
-if has_df: cur.execute('DROP TABLE df_out;')
-if has_fdisk: cur.execute('DROP TABLE fdisk_out;')
-
-cur.execute('CREATE TABLE hosts (Key INTEGER PRIMARY KEY, Hostname TEXT);')
-cur.execute('CREATE TABLE df_out (Key INTEGER PRIMARY KEY, Hostname TEXT, LogVolHome TEXT, LogVolOpt TEXT, LogVolRedhat TEXT, LogVolRoot TEXT, LogVolTmp TEXT, LogVolUsr TEXT, LogVolUsrLocal TEXT, LogVolVar TEXT, LogVolVarHttpd TEXT, LogVolVarWWW TEXT, df_out TEXT);')
-cur.execute('CREATE TABLE fdisk_out (Key INTEGER PRIMARY KEY, Hostname TEXT, fdisk_out TEXT);')
+cur.execute('CREATE TABLE IF NOT EXISTS fdisk_out (Key INTEGER PRIMARY KEY, Hostname TEXT, fdisk_out TEXT);')
+cur.execute('DELETE FROM fdisk_out;')
 
 
-for ssh_host,ssh_out in ssh_out_dict.items():
-  lvhome_insert = 'NULL'
-  lvopt_insert = 'NULL'
-  lvredhat_insert = 'NULL'
-  lvroot_insert = 'NULL'
-  lvtmp_insert = 'NULL'
-  lvusr_insert = 'NULL'
-  lvusrlocal_insert = 'NULL'
-  lvvar_insert = 'NULL'
-  lvvarhttpd_insert = 'NULL'
-  lvvarwww_insert = 'NULL'
-  try:
-    hostname = ssh_out[0]
-  except IndexError:
-    hostname = ssh_host
-  try:
-    delimita = ssh_out.index('--DELIMITER1')
-    delimit1 = delimita + 1
-    delimitb = ssh_out.index('--DELIMITER2')
-    delimit2 = delimitb - 1
-    delimit3 = delimitb + 1
-    df_delimited = ssh_out[delimit1:delimitb]
-    fdisk_delimited = ssh_out[delimit3:]
-  except ValueError:
-    df_delimited = ['']
-    fdisk_delimited = ['']
-  df_out = ''
-  for x in df_delimited:
-    xloc= df_delimited.index(x)
-    xloc += 1
-    df_out = df_out + x + '\n'
-    if re.search('Home',x): lvhome_insert = df_delimited[xloc]
-    if re.search('Opt',x): lvopt_insert = df_delimited[xloc]
-    if re.search('Redhat',x): lvredhat_insert = df_delimited[xloc]
-    if re.search('Root',x): lvroot_insert = df_delimited[xloc]
-    if re.search('Tmp',x): lvtmp_insert = df_delimited[xloc]
-    if re.search('Usr',x):
-      if not re.search('UsrLocal',x): 
-        lvusr_insert = df_delimited[xloc]
-    if re.search('UsrLocal',x): lvusrlocal_insert = df_delimited[xloc]
-    if re.search('Var',x):
-      if not re.search('VarWWW',x):
-        if not re.search('VarHttpd',x): 
-          lvvar_insert = df_delimited[xloc]
-    if re.search('VarHttpd',x): lvvarhttpd_insert = df_delimited[xloc]
-    if re.search('VarWWW',x): lvvarwww_insert = df_delimited[xloc]
-  fdisk_out = ''
-  for x in fdisk_delimited:
-    fdisk_out = fdisk_out + x + '\n'
-  cur.execute("insert into hosts(Hostname) VALUES ('%s')" % (hostname))
-  cur.execute("insert into df_out(Hostname,LogVolHome,LogVolOpt,LogVolRedhat,LogVolRoot,LogVolTmp,LogVolUsr,LogVolUsrLocal,LogVolVar,LogVolVarHttpd,LogVolVarWWW,df_out) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" % (hostname,lvhome_insert,lvopt_insert,lvredhat_insert,lvroot_insert,lvtmp_insert,lvusr_insert,lvusrlocal_insert,lvvar_insert,lvvarhttpd_insert,lvvarwww_insert,df_out))
-  cur.execute("insert into fdisk_out(Hostname,fdisk_out) VALUES ('%s','%s')" % (hostname,fdisk_out))
-  con.commit()
+for ssh_host, ssh_out in ssh_out_dict.items():
+    lvhome_insert = None
+    lvopt_insert = None
+    lvredhat_insert = None
+    lvroot_insert = None
+    lvtmp_insert = None
+    lvusr_insert = None
+    lvusrlocal_insert = None
+    lvvar_insert = None
+    lvvarhttpd_insert = None
+    lvvarwww_insert = None
+    hostname = ssh_out[0] if ssh_out else ssh_host
+    try:
+        delimita = ssh_out.index('--DELIMITER1')
+        delimit1 = delimita + 1
+        delimitb = ssh_out.index('--DELIMITER2')
+        delimit2 = delimitb - 1
+        delimit3 = delimitb + 1
+        df_delimited = ssh_out[delimit1:delimitb]
+        fdisk_delimited = ssh_out[delimit3:]
+    except ValueError:
+        df_delimited = ['']
+        fdisk_delimited = ['']
+        
+    df_out = []
+    for index, x in enumerate(df_delimited):
+        xloc = index + 1
+        df_out.append(x)
+        if 'Home' in x: 
+            lvhome_insert = df_delimited[xloc]
+        if 'Opt' in x: 
+            lvopt_insert = df_delimited[xloc]
+        if 'Redhat' in x: 
+            lvredhat_insert = df_delimited[xloc]
+        if 'Root' in x: 
+            lvroot_insert = df_delimited[xloc]
+        if 'Tmp' in x: 
+            lvtmp_insert = df_delimited[xloc]
+        if 'Usr' in x and 'UsrLocal' not in x:
+            lvusr_insert = df_delimited[xloc]
+        if 'UsrLocal' in x:
+            lvusrlocal_insert = df_delimited[xloc]
+        if 'Var' in x and 'VarWWW' not in x and 'VarHttpd' not in x:
+            lvvar_insert = df_delimited[xloc]
+        if 'VarHttpd' in x: 
+            lvvarhttpd_insert = df_delimited[xloc]
+        if 'VarWWW' in x: 
+            lvvarwww_insert = df_delimited[xloc]
 
-con.commit()
+    df_out = '\n'.join(df_out)
+
+    fdisk_out = '\n'.join(fdisk_delimited)
+        
+    cur.execute("insert into hosts (Hostname) VALUES (%s)", (hostname,))
+    cur.execute("""insert into df_out (
+        Hostname, LogVolHome, LogVolOpt, LogVolRedhat, LogVolRoot, 
+        LogVolTmp, LogVolUsr, LogVolUsrLocal, LogVolVar, LogVolVarHttpd, 
+        LogVolVarWWW, df_out) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", (
+            hostname, lvhome_insert, lvopt_insert, lvredhat_insert, 
+            lvroot_insert, lvtmp_insert, lvusr_insert, lvusrlocal_insert, 
+            lvvar_insert, lvvarhttpd_insert, lvvarwww_insert, df_out))
+    cur.execute("insert into fdisk_out (Hostname, fdisk_out) VALUES (%s,%s)", (hostname,fdisk_out))
+    con.commit()
 
 client.auth.logout(key)
