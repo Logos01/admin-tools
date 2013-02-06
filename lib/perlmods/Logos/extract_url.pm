@@ -32,7 +32,7 @@ sub extract_url {
     }
   }
   close $fh;
-  if (@urls) { print $urls[-1]; }
+  if (@urls) { foreach (@urls) { print "$_\n"; }}
 }
 
 1;

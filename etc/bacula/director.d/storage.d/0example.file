@@ -1,0 +1,8 @@
+Storage {
+  Name = HOSTNAME
+  Address = SDADDR                # N.B. Use a fully qualified name here
+  SDPort = 9103
+  Password = "PASSWORD"
+  Device = HOSTNAME
+  Media Type = HOSTNAMEFile
+}
