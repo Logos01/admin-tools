@@ -1,0 +1,318 @@
+#!/usr/bin/perl -w
+#Written by Daniel Kinon
+
+use strict;
+
+
+## Configuration ##
+our $deviceList = getLVMdeviceList();
+
+
+## Handle Arguments ##
+our $device = sanitizeDevice(shift);
+
+if( defined($device) ) {
+  # Check device and mountpoint
+  if( !defined($deviceList->{$device}) ) {
+    $device =~ s/[\/]*$//g;
+    foreach my $dev (keys %{$deviceList}) {
+      print "$device $dev ";
+      my $mountPoint = $deviceList->{$dev}->{'Mount Point'};
+      print "[$mountPoint]\n";
+      if( "$device" eq $deviceList->{$dev}->{'Mount Point'} ) {
+        $device = $dev;
+      }
+    }
+  }
+
+  # Modify current LVM device
+  if( defined($deviceList->{$device}) ) {
+    my $vgName = $deviceList->{$device}->{'VG Name'};
+    my $shortName = $deviceList->{$device}->{'Short Name'};
+    my $mountPoint = $deviceList->{$device}->{'Mount Point'};
+    
+    # Print device details
+    print "\nLV Device Details: $device\n\n";
+    my ($item,$value);
+    format STDOUT =
+@<<<<<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$item,                     $value
+.
+    foreach $item (keys %{$deviceList->{$device}} ) {
+      $value = $deviceList->{$device}->{$item};
+      write;
+    }
+    print "\n";
+
+    # Get user feedback on shrink or grow
+    print "Would you like to (s)hrink/(g)row $shortName on $vgName? [s/g/q]: ";
+    my $userResponse = <STDIN>;
+    chomp($userResponse);
+
+    if( lc($userResponse) eq "s" ) {
+      shrinkLV($device,$mountPoint,$vgName);
+    } elsif( lc($userResponse) eq "g" ) {
+      growLV($device,$mountPoint,$vgName);
+    } else {
+      print "aborting...\n\n";
+      exit(0);
+    }
+
+  # Create new LVM device
+  } else {
+    print "$device doesn't exist in the device list.\n";
+    print "Would you like to create it? [Y/y/N/n]: ";
+    my $userResponse = <STDIN>;
+    chomp($userResponse);
+
+    if( $userResponse eq "Y" or $userResponse eq "y" ) {
+      #Create device
+    }
+    else { print "\naborting...\n\n"; exit(0); }
+  }
+  
+} else {
+  print "usage: lvresize <LVM Device>\n\n";
+  exit(0);
+}
+
+
+
+## Functions ##
+
+sub unmount {
+  my $device = shift;
+  my $mountPoint = shift;
+  my ($shortName) = $device =~ /([^\/]+)$/;
+
+  my $mounted = `mount | grep -c "$shortName"`;
+  chomp($mounted);
+
+  my $ret = 0;
+  if( $mounted == 0 ) {
+    print " * skipping unmount, $mountPoint not mounted.\n\n";
+  } else {
+    print " * unmounting $mountPoint... ";
+    $ret = system("umount $mountPoint");
+
+    if( $ret != 0 ) {
+      print "   failed($ret)\n\n";
+      print "Aborting...\n\n";
+      exit($ret);
+    }
+    print "done($ret)\n\n";
+  }
+
+  return $ret;
+}
+
+sub mount {
+  my $mountPoint = shift;
+
+  print " * mounting $mountPoint... ";
+  my $ret = system("mount $mountPoint");
+
+  if( $ret != 0 ) {
+     print "   failed($ret)\n\n";
+     print "   Something went wrong mounting $mountPoint, check /etc/fstab.\n";
+     exit($ret);
+  }
+  print "done($ret)\n\n";
+
+  return $ret;
+}
+
+sub checkFS {
+  my $device = shift;
+
+  print " * checking filesystem... \n";
+  my $ret = system("e2fsck -f $device");
+
+  if( $ret != 0 ) {
+    print "   failed($ret)\n\n";
+    print "Aborting...\n\n";
+    exit($ret);
+  }
+  print "   done($ret)\n\n";
+
+  return $ret;
+}
+
+sub resizeFS {
+  my $device = shift;
+  my $size = shift;
+
+  print " * resizing filesystem to ${size}GB... \n";
+  my $ret = system("resize2fs $device ${size}G");
+
+  if( $ret != 0 ) {
+    print "   failed($ret)\n\n";
+    print "Aborting...\n\n";
+    exit($ret);
+  }
+  print "   done($ret)\n\n";
+
+  return $ret;
+}
+
+sub shrinkLV {
+  my $device = shift;
+  my $mountPoint = shift;
+  my $vgName = shift;
+
+  my $size = 0;
+  while( $size eq "0" ) {
+    print "What size(GB) do you want to shrink to? [##]: ";
+    $size = <STDIN>;
+    chomp($size);
+    if( !($size =~ /^\d+$/) ) { print "error: $size must be a number.\n\n"; $size = 0; }
+  }
+  print "\n";
+
+  unmount($device,$mountPoint);
+  checkFS($device);
+  resizeFS($device,$size);
+
+  # Shrink LV
+  print " * Shrinking logical volume to ${size}G... \n";
+  my $ret = system("lvresize -L ${size}G $device");
+  die "error: lvresize exited with $ret return code\n\n" if( $ret ne 0 );
+  print "   done($ret)\n\n";
+
+  mount($mountPoint);
+}
+
+sub growLV {
+  my $device = shift;
+  my $mountPoint = shift;
+  my $vgName = shift;
+
+  my $vgList = getVGlist();
+  my $freeLE = $vgList->{$vgName}->{'Free  PE / Size'};
+  print "$vgName has $freeLE free\n";
+
+  my $size = 0;
+  while( $size eq "0" ) {
+    print "What size(GB) do you want to grow to? [##]: ";
+    $size = <STDIN>;
+    chomp($size);
+    if( !($size =~ /^\d+$/) ) { print "error: $size must be a number.\n\n"; $size = 0; }
+  }
+  print "\n";
+
+  # Grow LV
+  print " * Growing logical volume to ${size}G... \n";
+  my $ret = system("lvresize -L ${size}G $device");
+  die "error: lvresize exited with $ret return code\n\n" if( $ret ne 0 );
+  print "   done($ret)\n\n";
+
+  resizeFS($device,$size);
+  exit (0);
+}
+
+sub getLVMdeviceList {
+  my $devices;
+  my $mountPoints = getMountPoints();
+
+  my $currentDevice;
+  my $numDevices = 0;
+  open(LV,"lvdisplay|") or die "Couldn't run lvdisplay: $!\n\n";
+  while( my $line = <LV> ) {
+
+    # Handle LV Name
+    if( $line =~ /\s+LV Name\s+(.+)$/ ) {
+      $currentDevice = $1;
+      my ($shortName) = $currentDevice =~ /([^\/]+)$/;
+      $devices->{$currentDevice}->{'Short Name'} = $shortName;
+      $numDevices++;
+    }
+
+    # Handle the other data
+    foreach my $entry ('VG Name','LV UUID','LV Write Access','LV Status','# open','LV Size','Current LE','Segments','Allocation','Read ahead sectors','- currently set to','Block device') {
+      if( $line =~ /\s+$entry\s+(.+)$/ ) { $devices->{$currentDevice}->{$entry} = $1; }
+    }
+
+    if( $line =~ /--- Logical volume ---/ && defined($currentDevice) ) {
+      # Handle mount point
+      my $mountPoint = $mountPoints->{$currentDevice}->{'Mount Point'};
+      $devices->{$currentDevice}->{'Mount Point'} = $mountPoint;
+
+      # Handle free space
+      $devices->{$currentDevice}->{'Free Space'} = getFreeSpace($mountPoint);
+    }
+  }
+  close(LV);
+
+  return $devices;
+}
+
+sub getVGlist {
+  my $volGroups;
+
+  my $currentVolGroup;
+  my $numVolGroups = 0;
+  open(VG,"vgdisplay|") or die "Couldn't run vgdisplay: $!\n\n";
+  while( my $line = <VG> ) {
+
+    # Handle VG Name
+    if( $line =~ /\s+VG Name\s+(.+)$/ ) {
+      $currentVolGroup = $1;
+      $numVolGroups++;
+    }
+
+    # Handle the other data
+    foreach my $entry ('Format','Metadata Areas','Metadata Sequence No','VG Access','VG Status','MAX LV','Cur LV','Open LV','Max PV','Cur PV','Act PV','VG Size','PE Size','Total PE','Alloc PE / Size','Free  PE / Size','VG UUID') {
+      if( $line =~ /\s+$entry\s+(.+)$/ ) { $volGroups->{$currentVolGroup}->{$entry} = $1; }
+    }
+  }
+  close(VG);
+
+  return $volGroups;
+}
+
+sub getMountPoints {
+  my $mountPoints;
+  my $device = shift;
+
+  open(FSTAB,"/etc/fstab") or die "Couldn't open /etc/fstab: $!\n\n";
+  while( my $line = <FSTAB> ) {
+    my ($device,$mountPoint,$fsType,$fsOptions,$d1,$d2) = $line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\d)\s+(\d)\s*$/;
+    $mountPoints->{$device}->{'Mount Point'} = $mountPoint;
+    $mountPoints->{$device}->{'FS Type'} = $fsType;
+    $mountPoints->{$device}->{'FS Options'} = $fsOptions;
+  }
+
+  if( defined($device) ) {
+    if( defined($mountPoints->{$device}->{'Mount Point'}) ) {
+      return $mountPoints->{$device}->{'Mount Point'};
+    } else {
+      return "<NA>";
+    }
+  }
+  return $mountPoints;
+}
+
+sub getFreeSpace {
+  my $mountPoint = shift;
+  my $freeSpace = `df -h "$mountPoint" | tail -n 1 | awk '{print \$3}'`;
+
+  if( defined($freeSpace) ) {
+    chomp($freeSpace);
+    return $freeSpace;
+  }
+  return "<NA>";
+}
+
+sub sanitizeDevice {
+  my $ArgOneIn = shift ;
+  if ($ArgOneIn =~ m/-/){
+    my @ArgOneSplit1 = split(/\//,$ArgOneIn);
+    my @ArgOneSplit2 = split(/-/,$ArgOneSplit1[-1]);
+    $device = "/dev/$ArgOneSplit2[-2]/$ArgOneSplit2[-1]/";
+    return $device
+  }
+  else {
+    $device = $ArgOneIn;
+    return $device
+  }
+}
