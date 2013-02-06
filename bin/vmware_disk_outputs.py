@@ -112,7 +112,7 @@ for ssh_host, ssh_out in ssh_out_dict.items():
     lvvar_insert = None
     lvvarhttpd_insert = None
     lvvarwww_insert = None
-    hostname = ssh_out[0] if ssh_out else ssh_host
+    hostname = ssh_host
     try:
         delimita = ssh_out.index('--DELIMITER1')
         delimit1 = delimita + 1
