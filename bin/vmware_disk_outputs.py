@@ -53,8 +53,8 @@ def vmwaretest(id):
     devices = client.system.getDevices(key,id)
     is_vmware = 0
     for device in devices:
-        for value in device.values():
-            if "VMware" in value:
+        for dvalue in device.values():
+            if 'VMware' in str(dvalue):
                 return True
     return False
 
@@ -65,13 +65,13 @@ for item in systemlist:
     systemdict[item['name']] = item['id']
 
 vmdict = {}
-for key, value in systemdict.items():
-    vmdict[skey] = vmwaretest(value)
+for skey, svalue in systemdict.items():
+    vmdict[skey] = vmwaretest(svalue)
 
 ssh_out_dict = {}
 ssh_events = []
-for hostname, value in vmdict:
-    if not value:
+for hostname, vvalue in vmdict.items():
+    if not vvalue:
         continue
 
     current_run = shell('''ssh -oConnectTimeout=2 -q %s "hostname; echo '--DELIMITER1'; df -h ; echo '--DELIMITER2'; fdisk -l"''' % hostname).run()
@@ -112,7 +112,7 @@ for ssh_host, ssh_out in ssh_out_dict.items():
     lvvar_insert = None
     lvvarhttpd_insert = None
     lvvarwww_insert = None
-    hostname = ssh_out[0] if ssh_out else ssh_host
+    hostname = ssh_host
     try:
         delimita = ssh_out.index('--DELIMITER1')
         delimit1 = delimita + 1
@@ -126,25 +126,26 @@ for ssh_host, ssh_out in ssh_out_dict.items():
         
     for index, x in enumerate(df_delimited):
         xloc = index + 1
-        if 'Home' in x: 
+        y = str(x)
+        if 'Home' in y: 
             lvhome_insert = df_delimited[xloc]
-        if 'Opt' in x: 
+        if 'Opt' in y: 
             lvopt_insert = df_delimited[xloc]
-        if 'Redhat' in x: 
+        if 'Redhat' in y: 
             lvredhat_insert = df_delimited[xloc]
-        if 'Root' in x: 
+        if 'Root' in y: 
             lvroot_insert = df_delimited[xloc]
-        if 'Tmp' in x: 
+        if 'Tmp' in y: 
             lvtmp_insert = df_delimited[xloc]
-        if 'Usr' in x and 'UsrLocal' not in x:
+        if 'Usr' in y and 'UsrLocal' not in y:
             lvusr_insert = df_delimited[xloc]
-        if 'UsrLocal' in x:
+        if 'UsrLocal' in y:
             lvusrlocal_insert = df_delimited[xloc]
-        if 'Var' in x and 'VarWWW' not in x and 'VarHttpd' not in x:
+        if 'Var' in y and 'VarWWW' not in y and 'VarHttpd' not in y:
             lvvar_insert = df_delimited[xloc]
-        if 'VarHttpd' in x: 
+        if 'VarHttpd' in y: 
             lvvarhttpd_insert = df_delimited[xloc]
-        if 'VarWWW' in x: 
+        if 'VarWWW' in y: 
             lvvarwww_insert = df_delimited[xloc]
 
     df_out = '\n'.join(df_delimited)
