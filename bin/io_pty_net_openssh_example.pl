@@ -37,7 +37,6 @@ STDOUT: while (<$pty>) {
     }
     unless ($com3) {
       print $pty "\n\r";
-      print
       $com3 = 1;
     }
   }
