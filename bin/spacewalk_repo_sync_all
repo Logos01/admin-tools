@@ -67,8 +67,10 @@ fi
 
 for v in ${vers[@]}; do
   for a in ${arches[@]} ; do
-    [ "$a" = "i386" ] && b=32
-    [ "$a" = "x86_64" ] && b=64
+    epel_string="https://mirrors.fedoraproject.org/metalink?repo=epel-"${v}"&arch="${a}
+    spacewalk-repo-sync --channel=epel-${v}-${a} --url="${epel_string}"
+    spacewalk_string="http://yum.spacewalkproject.org/1.8-client/RHEL/"${v}"/"${a}"/"
+    spacewalk-repo-sync --channel=spacewalk-${v}-${a} --url="${spacewalk_string}"
     for repo in ${repos[@]}; do
       mirror=$(curl -s 'http://mirrorlist.centos.org/?release='$v'&arch='$a'&repo='$repo | grep -v 'ftp' | head -1)
       if [ "$repo" != "os" ] ; then
