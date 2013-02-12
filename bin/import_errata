@@ -52,9 +52,9 @@ set -e
    if [ ! -x /usr/local/bin/errata-import.pl ] ; then
      mkdir /tmp/errata 
      if $(arg_check '--debug|-d' ${environment_args[@]} ) ; then
-       wget -v -O /tmp/errata/ http://cefs.steve-meier.de/errata-import.tar
+       wget -v -O /tmp/errata/errata-import.tar http://cefs.steve-meier.de/errata-import.tar
      else 
-       wget -q -O /tmp/errata http://cefs.steve-meier.de/errata-import.tar
+       wget -q -O /tmp/errata/errata-import.tar http://cefs.steve-meier.de/errata-import.tar
      fi
      cd /tmp/errata ; tar xf errata-import.tar
      chmod +x errata-import.pl
