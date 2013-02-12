@@ -16,6 +16,7 @@
 
 import sys, re
 from optparse import OptionParser
+sys.path.append('/usr/local/lib/pymods/')
 from utils import shell
 from datetime import datetime, timedelta
 
