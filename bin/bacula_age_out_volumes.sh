@@ -34,7 +34,7 @@ cleandir_Incremental(){
       for x in ${toprune[@]} ; do 
         echo "delete volume=$x yes" ;
       done\
-    ) | bconsole
+    ) | /usr/bin/bconsole
   
     for x in ${toprune[@]} ; do
       rm $x
@@ -73,7 +73,7 @@ cleandir_Full(){
       for x in ${toprune[@]} ; do 
         echo "delete volume=$x yes" ;
       done\
-    ) | bconsole
+    ) | /usr/bin/bconsole
   
     for x in ${toprune[@]} ; do
       rm $x
@@ -92,7 +92,7 @@ cleandir_Base(){
       for x in ${toprune[@]} ; do 
         echo "delete volume=$x yes" ;
       done\
-    ) | bconsole
+    ) | /usr/bin/bconsole
   
     for x in ${toprune[@]} ; do
       rm $x
