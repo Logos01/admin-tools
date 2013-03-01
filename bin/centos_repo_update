@@ -11,7 +11,7 @@
 #
 ###################################
 
-source /etc/bashrc
+[ -f /etc/bashrc ] && source /etc/bashrc
 
 ##-- CONFIGURATION --##
 
