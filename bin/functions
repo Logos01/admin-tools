@@ -13,6 +13,7 @@ function error(){
   fi
   exit "${CODE}"
 }
+
 function ssh_addhost(){
   ## Appends the host's key to known_hosts, adds user's pubkey to authorized_keys of remote host.
   # Depends on the sshpass binary, and a plaintext file, ~/.ssh/passtext, containing the user's password.
