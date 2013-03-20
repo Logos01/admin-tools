@@ -56,7 +56,7 @@ class shell:
     if noerrval: return output[0]
     if not noerrval: return output
 
-  def run(self):
+  def run(self,**commoptions):
     command = self.command
     delnoerr = False ; shellval = False ; noerrval = True ; output= []
     for key in self.options.keys():
@@ -65,11 +65,11 @@ class shell:
     if delnoerr: del self.options['noerr']
     if not shellval: command = shlex.split(command)
     runpipe = Popen(command,stdout=PIPE,stderr=PIPE,**self.options)
-    result = runpipe.communicate()
+    result = runpipe.communicate(**commoptions)
     output = self.return_output(result,noerrval)
     return output
 
-  def send(self):
+  def send(self,**commoptions):
     intr = 0
     output = []
     command = self.command ; remote = self.remote
@@ -78,7 +78,7 @@ class shell:
       if key == 'noerr': noerrval = self.options['noerr'] ; delnoerr = True
     if delnoerr: del self.options['noerr']
     sendpipe=Popen(remote,shell=True,stdin=PIPE,stdout=PIPE,stderr=PIPE,**self.options)
-    result = sendpipe.communicate(input=command)
+    result = sendpipe.communicate(input=command,**commoptions)
     output = self.return_output(result,noerrval)
     return output
 
