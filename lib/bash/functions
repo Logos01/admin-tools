@@ -1,98 +1,134 @@
 #!/bin/bash 
 
 function error(){
-  ## Error handling trap
-  # Displays line number where error occurred and prints exit status of last command
-  # Exits with said status.
-  # Usage: trap 'error ${LINENO}' ERR
-  local PARENT_LINENO="$1" ; local MESSAGE="$2" ; local CODE="${3:-1}"
-  if [[ -n "$MESSAGE" ]] ; then
-    echo "Error on or near line ${PARENT_LINENO}: ${MESSAGE}; exiting with status ${CODE}"
-  else
-    echo "Error on or near line ${PARENT_LINENO}; exiting with status ${CODE}"
-  fi
-  exit "${CODE}"
+    ## Error handling trap
+    # Displays line number where error occurred
+    # and prints exit status of last command
+    # Exits with said status.
+    # Usage: trap 'error ${LINENO}' ERR
+    local PARENT_LINENO="$1"
+    local MESSAGE="$2"
+    local CODE="${3:-1}"
+    errline="Error on or near line ${PARENT_LINENO}"
+    exitcode="exiting with status ${CODE}"
+    if [[ -n "$MESSAGE" ]] ; then
+        echo "${errline}: ${MESSAGE}; ${exitcode}"
+    else
+        echo "${errline}; ${exitcode}"
+    fi
+    exit "${CODE}"
 }
 
 function ssh_addhost(){
-  ## Appends the host's key to known_hosts, adds user's pubkey to authorized_keys of remote host.
-  # Depends on the sshpass binary, and a plaintext file, ~/.ssh/passtext, containing the user's password.
-  # Exects id_rsa keypair.
-  host=$1
-  domain=$2
-  user=$3
-  fqdn=${host}.${domain}
-  ip=$(dig +short ${fqdn})
-  if [ "$ip" ] ; then
-    echo "$(ssh-keyscan $fqdn | sed "s/ ssh-rsa/,${ip} ssh-rsa/")" >> ~/.ssh/known_hosts
-    (
-      echo ""
-      echo "Host $host"
-      echo "    Hostname ${host}.${domain}"
-      echo "    User     $user"
-    ) >> ~/.ssh/config
-    sshpass -f ~/.ssh/passtext ssh-copy-id -i ~/.ssh/id_rsa $host
-  else
-    echo "${fqdn} has no known DNS entry. No actions performed."
-  fi    
+    ## Appends the host's key to known_hosts, 
+    # adds user's pubkey to authorized_keys of remote host.
+    # Depends on:
+    # - the sshpass binary
+    # -  a plaintext file, ~/.ssh/passtext, containing the user's password.
+    # Exects id_rsa keypair.
+    host=$1
+    domain=$2
+    user=$3
+    if [[ "$2" ]]; then
+        fqdn=${host}.${domain}
+    else
+        fqdn=${host}
+    fi	
+    ip=$(dig +short ${fqdn})
+    if [ "$ip" ] ; then
+        host_str="$(ssh-keyscan $fqdn | sed "s/ ssh-rsa/,${ip} ssh-rsa/")" 
+	echo "${host_str}" >> ~/.ssh/known_hosts
+        (
+            echo ""
+            echo "Host $host"
+            echo "    Hostname ${host}.${domain}"
+            echo "    User     $user"
+        ) >> ~/.ssh/config
+        sshpass -f ~/.ssh/passtext ssh-copy-id -i ~/.ssh/id_rsa $host
+    else
+        echo "${fqdn} has no known DNS entry. No actions performed."
+    fi
 }
 
 function ipprint(){ 
-  ## Prints in "hostname:	###.###.###.###" format the string of hosts or file hosts (newline delimited) passed.
-  LST=$@   
-  ( \
-    [ -e "$LST" ] && cat $LST \
-    || [ ! -e "$LST" ] && for i in $LST ; do \
-      echo $i ;\
-     done\
-  ) | while read host ; do 
-  echo -en "$host:\t$(dig +short $host.company.com)\n" 
-  done 
+    ## Prints in "hostname:	###.###.###.###" format 
+    # the string of hosts or file hosts (newline delimited) passed.
+    LST=$@   
+    ( \
+        [ -e "$LST" ] && cat $LST \
+        || [ ! -e "$LST" ] && for i in $LST ; do \
+            echo $i ;\
+        done\
+    ) | while read host ; do 
+        echo -en "$host:\t$(dig +short $host.company.com)\n" 
+    done 
 }
 
 function ksmtop(){ 
-  ## Produces live printouts -- column delimited -- of the current KSM metrics, a la 'watch'.
-  cd /sys/kernel/mm/ksm/ 
-  while true ; do 
-    date 
-    for i in `ls` ; do 
-      printf "%-20s %-20s\n" $i `cat $i` 
-    done 
-    sleep 2 
-    clear 
-  done
+    ## Produces live printouts -- column delimited -- 
+    #  of the current KSM metrics, a la 'watch'.
+    cd /sys/kernel/mm/ksm/ 
+    while true ; do 
+        date 
+        for i in `ls` ; do 
+            printf "%-20s %-20s\n" $i `cat $i` 
+        done 
+        sleep 2 
+        clear 
+    done
 }
 
 function inpath(){ 
-  ## Prints all filenames that match the regex passed that are currently located anywhere in $PATH.
-  for item in $@ ; do 
-    echo $PATH | awk -F':' '{ for (i=2 ; i<=NF ; i++) print $i ; }' | while read line ; do 
-      ls $line | grep $item 
-      done 
+    ## Prints all filenames that match the regex passed 
+    #  that are currently located anywhere in $PATH.
+    for item in $@ ; do 
+        echo $PATH | awk -F':' '{ for (i=2 ; i<=NF ; i++) print $i ; }' |\
+        while read line ; do 
+            ls $line | grep $item 
+        done 
     done 
 }
 
-## Prints out in largest-> smallest by human-readable format the sizes of all files(and directories) in the current directory.
-function du_by_size(){ du -ks * | sort -nr | cut -f2 | xargs du -hs ; }
+function du_by_size(){ 
+    ## Prints out in largest-> smallest by human-readable format
+    # the sizes of all files(and directories) in the current directory.
+    du -ks * | sort -nr | cut -f2 | xargs du -hs ;
+ }
 
 function convert_path_to_string_subs () { 
-  ## Converts a path argument into a series of string substitutions to reflect every directory leading up to the final element of the path.
-  # /path/to/dir becomes /path{'',/to{'',/dir}}
-  arr=($(echo $1 | tr "/" "\n")) 
-  echo -en "/${arr[0]}" 
-  for x in ${arr[@]:1} ; do 
-    echo -en "{'',/$x" 
-  done
-  for x in ${arr[@]:1} ; do
-    echo -en "}"
-  done
-  echo ''
+    ## Converts a path argument into a series of string substitutions 
+    #  to reflect every directory leading up to the final element of the path.
+    # /path/to/dir becomes /path{'',/to{'',/dir}}
+    arr=($(echo $1 | tr "/" "\n")) 
+    echo -en "/${arr[0]}" 
+    for x in ${arr[@]:1} ; do 
+        echo -en "{'',/$x" 
+    done
+    for x in ${arr[@]:1} ; do
+        echo -en "}"
+    done
+    echo ''
 }
 
 function arg_check(){
-  ## Checks for presence of specified argument within given list of args.
-  # Usage: arg_check '--long|-l' ${array[@]}
-  # Returns "0" if argument is found.
-  local check_args=($@) 
-  /bin/echo ${check_args[@]:1} | /bin/egrep -q "(${check_args[0]})"
+    ## Checks for presence of specified argument within given list of args.
+    # Usage: arg_check '--long|-l' ${array[@]}
+    # Returns "0" if argument is found.
+    local check_args=($@) 
+    /bin/echo ${check_args[@]:1} | /bin/egrep -q "(${check_args[0]})"
+}
+
+function in-addr_arpa_convert(){  
+    ## Returns an in-addr.arpa formatted string for the IP address
+    #  associated  with the hostname provided as $1.
+    hname=$1;
+    ipaddr=$(dig +short $1);
+    if [[ "$ipaddr" ]] ; then
+	arpa="$(echo $ipaddr | \
+        sed 's/\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)\.\([0-9]\+\)/\4.\3.\2.\1/g'
+	)"
+	arpa=${arpa}".in-addr.arpa"
+	echo $arpa 
+    else
+        return 1 ;
 }
