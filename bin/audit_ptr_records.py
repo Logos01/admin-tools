@@ -60,7 +60,6 @@ def prepare_host_lists(subnetstring,hostdict,hosts):
     from utils import shell
     serverURL='REPLACEWITHREALHTTPURL'
     client = xmlrpclib.Server(serverURL)
-    # '1' is the identifier for the LifeLock customer in ipplan.
     for subnet in client.ipplan.FetchBase(1,0,0,"",0,""):
         if subnet['baseaddr'] == subnetstring:
             baseindex = subnet['baseindex']
@@ -90,7 +89,7 @@ def prepare_host_lists(subnetstring,hostdict,hosts):
     try:
         working_subnet
     except TypeError:
-        exit_message = "Subnet %s not found in IPPlan for LifeLock customer."
+        exit_message = "Subnet %s not found in IPPlan for customer."
         exit_message = exit_message % subnetstring
         print >> sys.stderr, exit_message
         sys.exit(1)
