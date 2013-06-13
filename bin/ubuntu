@@ -3,11 +3,11 @@
 ##-- CONFIGURATION --##
 
 #- Eval statements
-MOUNT="/system/xbin/busybox mount"
-BIND="/system/xbin/busybox mount --bind"
-CHROOT="/data/local/mnt/chroot"
+mountcall="/system/xbin/busybox mount"
+bindcall="/system/xbin/busybox mount --bind"
+chrootloc="/data/local/mnt/chroot"
 
-MOUNT_IMAGE="$MOUNT /data/local/chroot.img $CHROOT"
+mount_image="${mountcall} /data/local/chroot.img ${chrootloc}"
 #-
 
 locs=(\
@@ -36,16 +36,16 @@ enter_chroot(){ chroot . /bin/bash --rcfile /root/.bashrc ;}
 
 cd /data/local/mnt/chroot
 
-ismounted $CHROOT || $MOUNT_IMAGE
+ismounted ${chrootloc} || ${mount_image}
 
 for loc in "${locs[@]}" ; do
-  unset LOC_BIND                
-  LOC_BIND="$BIND /$loc $CHROOT/$loc"
-  ismounted $CHROOT/$loc || $LOC_BIND
+  unset $bind_loc                
+  bind_loc="${bindcall} /${loc} ${chrootloc}/${loc}"
+  ismounted ${chrootloc}/${loc} || ${bind_loc}
 done
-RETVAL=$?
+retval=$?
 
-if [ $RETVAL -eq 0 ] ; then
+if [[ ${retval} ]] ; then
   if [ -t 0 ] ; then
     enter_chroot
   else startup
