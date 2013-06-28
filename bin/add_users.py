@@ -8,6 +8,18 @@ import time
 
 decrypted_pass = ''
 chan = ''
+try:
+    host = sys.argv[1]
+    user = sys.argv[2]
+except IndexError:
+    exitmsg = '''
+    Usage: %s ${HOSTNAME/IP} ${USERNAME}
+    Please ensure both arguments are valid and present.
+    '''
+    exitmsg = exitmsg % (sys.argv[0],)
+    print >> sys.stderr, exitmsg
+    sys.exit(1)
+
 host = sys.argv[1]
 user = sys.argv[2]
 userdict = {}
