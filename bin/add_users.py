@@ -52,6 +52,7 @@ def addGroups():
         chan.send(group_add)
         while not chan.recv_ready():
             time.sleep(2)
+        print chan.recv(1024)
 
 def addUsers():
     global chan
@@ -76,7 +77,7 @@ def addUsers():
             chan.send(add_user)
             while not chan.recv_ready():
                 time.sleep(2)
-            print(chan.recv(1024))
+            print chan.recv(1024)
 
 def runRemoteShell():
     host = sys.argv[1]
@@ -93,12 +94,12 @@ def runRemoteShell():
     chan.send('sudo su -\n')
     time.sleep(1)
     chan.send('%s\n' % decrypted_pass)
-    print(chan.recv(1024))
+    print chan.recv(1024)
     while not chan.recv_ready():
         time.sleep(2)
     chan.send('pwd\n')
-    print(chan.recv(1024))
-    print(chan.recv(1024))
+    print chan.recv(1024)
+    print chan.recv(1024)
     addGroups()
     addUsers()
 
