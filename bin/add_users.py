@@ -8,20 +8,6 @@ import time
 
 decrypted_pass = ''
 chan = ''
-try:
-    host = sys.argv[1]
-    user = sys.argv[2]
-except IndexError:
-    exitmsg = '''
-    Usage: %s ${HOSTNAME/IP} ${USERNAME}
-    Please ensure both arguments are valid and present.
-    '''
-    exitmsg = exitmsg % (sys.argv[0],)
-    print >> sys.stderr, exitmsg
-    sys.exit(1)
-
-host = sys.argv[1]
-user = sys.argv[2]
 userdict = {}
 groupdict = {}
 
@@ -93,6 +79,8 @@ def addUsers():
             print(chan.recv(1024))
 
 def runRemoteShell():
+    host = sys.argv[1]
+    host = sys.argv[2]
     global chan
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -106,23 +94,29 @@ def runRemoteShell():
     time.sleep(1)
     chan.send('%s\n' % decrypted_pass)
     print(chan.recv(1024))
-    exitstat = int(chan.exit_status_ready())
-    print "Sudo invocation command exit status was: %s" % (exitstat)
     while not chan.recv_ready():
         time.sleep(2)
     chan.send('pwd\n')
     print(chan.recv(1024))
     print(chan.recv(1024))
-    exitstat = int(chan.exit_status_ready())
-    print "Exit status of last command was: %s" % (exitstat)
     addGroups()
     addUsers()
 
 def main():
-    populateUserdict()
-    populateGroupDict()
-    decryptPass()
-    runRemoteShell()
+    try:
+        populateUserDict()
+        populateGroupDict()
+        decryptPass()
+        runRemoteShell()
+        return 0
+    except IndexError:
+        exitmsg = '''
+        Usage: %s ${HOSTNAME/IP} ${USERNAME}
+        Please ensure both arguments are valid and present.
+        '''
+        exitmsg = exitmsg % (sys.argv[0],)
+        print >> sys.stderr, exitmsg
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
