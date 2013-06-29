@@ -81,7 +81,7 @@ def addUsers():
 
 def runRemoteShell():
     host = sys.argv[1]
-    host = sys.argv[2]
+    user = sys.argv[2]
     global chan
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
