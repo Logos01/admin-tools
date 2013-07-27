@@ -1,0 +1,860 @@
+Accounts
+
+___Have you ever created an account?
+___--A non-user account?
+
+___Have you ever deleted an account?
+___--Restored a deleted account?
+___--Should you not have deleted it?
+
+___Have you ever detected a security breach (breakin, root compromise, or some such)?
+___--Did you track down the jerk who did it?
+___--Did you identify him/her?
+___--Did you sick the FBI on him/her?
+___--Did you get a conviction?
+___--Did the perpetrator kill him/herself in jail out of remorse?
+
+___Have you ever threatened to kill someone's account if they ask another stupid question?
+___--Did you?
+
+___Have you ever noticed that some 'remove_user' shell scripts clean up by removing the user's home directory?
+___--Did you notice this before you removed a system account whose home directory is '/'?
+
+___Do you keep more than one account for personal use?
+
+___Do you have accounts on alien networks (not administered by you) for "debugging" purposes?
+___--Do you not allow them on your own system?
+
+___Do you grant "guest" accounts to your friends?
+___--Does the number of guests ever exceed the number of legitimate users?
+
+___Have you ever had an account on a machine on the ARPANET?
+___--BITNET?
+___--MILNET (only if you don't work in the military)?
+___--Do they still work?
+___--Can you prove it?
+
+___Do you have a user named "ingres"?
+___--Have you caught people logged in from remote sites into that account?
+
+Passwords
+
+___Do your accounts have passwords?
+___--All of them?
+
+___Do you run Crack on passwords?
+___--Does it take longer than a week?
+___----Even though it checks only recently changed passwords?
+
+___Have you ever used any of the following passwords (case insensitive):
+
+    abcdef
+    123456
+    qwerty
+    xyzzy
+    M1PQ
+    password
+
+
+___--Were these used as root passwords?
+___--More than once?
+
+___Do you have a different root pasword than your own password?
+___--Is it crack-able?
+
+___Have you ever forgotten your root password?
+___--Did it matter?
+
+___Do you have multiple uid-0 accounts on your system?
+___--Do any of them have no password?
+___--Do any of them have no password and a standard shell?
+
+___Do you have equivalenced hosts (.rhosts, hosts.equiv)?
+___--Did you check user verifications?
+
+___Do you use shadow passwords?
+___--Does your system officially support it?
+
+___Do you have passworded groups?
+
+___Do you have any padded-password systems installed?
+___--Are they used?
+
+___Do you silently change users' passwords?
+___--More than once per week?
+
+___Do you trust someone else with the root password while you're on vacation?
+
+___Do all dial-up IP users use the same dial-up IP account?
+___--Without security handshaking?
+
+Security
+
+___Have you ever accepted a UUCP file?
+___--Without password protection?
+
+___Do you use maximum auditing?
+
+___Do you audit each user?
+
+___Do you subscribe to all of the following mailing lists :
+
+    8lgm
+    bugtraq
+    cert advisories
+    ciac
+
+
+___--Do you read all the posts?
+___--Have you ever posted to one of them?
+___----Did you get flamed?
+___--you don't subscribe to these lists, because Dan Farmer and Gene Spafford tell you personally when they discover a new security hole.
+
+___Do you use rdist?
+___--Is the security bug active?
+
+___Have you ever been trying to fix the system clock and expired root's password?
+___--Then logged out?
+
+___Has your site ever been broken into?
+___--By a KGB agent?
+___--Did you care?
+
+___Have you ever broken into someone else's site?
+___--Is that how you got your job?
+
+Networks
+
+___Have you ever configured a network interface?
+
+___Have you ever connect a machine to the Net?
+___--From scratch?
+
+___Have you ever ifconfig'ed down the network interface through which you were communicating to the machine?
+
+___Have you ever logged some traffic to/from the Internet?
+
+___Have you ever logged *all* traffic to/from the Internet?
+
+___--Did you read the logs?
+___--More than 3 times a month?
+___--Daily?
+
+___Have you ever filtered IP traffic?
+
+___Have you ever built a proxy service firewall?
+
+___Have you ever concealed portions of your network?
+
+___Have you ever concealed your entire network except for a proxy firewall?
+
+___Have you ever wormhole-tunneled traffic to conceal portions of your network?
+
+___Have you ever floodpinged your supervisor's workstation?
+
+___Can you program routing?
+___--gated?
+___--A Cisco/Wellfleet/Annex/whatever brand dedicated router?
+___--KA9Q?
+
+___Have you ever used an IP address different than the one assigned to you?
+___--On purpose?
+___--To get around a network problem?
+___--To increase your access privileges?
+___--To hide your acts?
+
+___Have you ever brought up a PPP link?
+___--Between two Cisco routers?
+___--On the AUX port?
+___--Did you run IP over it?
+___--Did you run IPX over it?
+___--Did you run transparent bridging over it?
+___--Did it stay up for more than 10 minutes?
+___--Did you use the undocumented ppp commands?
+
+___Have you ever plugged both Token Ring & Ethernet modules into the same backplane & segment on a Synoptics 3800?
+___--Did they work?
+___--Did you have connectivity?
+
+___Have you ever tried to configure EIGRP and IGRP at the same time?
+___--With the same autonomous numbers?
+___--Did it work?
+
+___Have you ever updated a Cisco 2500 router?
+___--While it was running?
+___--From flash?
+___--Did it work?
+
+___Have you ever accidently caused a routing loop on your WAN?
+___--Did you fix it?
+___--Did you do it on purpose?
+
+___Do you know your netmask?
+
+___Do you know the IP addresses for all your vital equipment?
+___--Do you have them in /etc/hosts for just in case?
+___----Causing a machine that moved around to be denied by tcp_wrapper?
+___--And the Ethernet addresses?
+
+___Have you ever telnetted to your mailhost, and then back to your loghost, and then back to your mailhost, ad infinitum, 'cause you felt like it?
+
+___Have you ever configured BIND/DNS?
+___--Were you running NIS at the same time?
+___--Did you want to blow up SUN Microsystems as a result?
+
+___Have you ever renamed a server?
+___--Unintentionally?
+___--More than once?
+
+___Can you build a primary nameserver for a domain?
+___--Without looking at an example?
+___--Including correct MX records?
+___--Do you have the latest named.root?
+___--Can you give IP addresses of 3 or more of the root nameservers?
+
+___Have you ever dialed out on a non-dialout device? (mainly Linux machines)
+___--Was it a block device?
+___--Did you recover?
+
+Hardware
+
+___Have you ever crashed the server?
+___--More than once in a day?
+___--On purpose?
+
+___Have you ever lost power to the server because your UPS died?
+___--Did it crash a critical application?
+___--Did you explain the irony to your boss?
+___--Did he think it was funny?
+
+___During a reboot, have you ever pulled the plug on the wrong machine?
+___--More than once?
+___--Did you go back and label the (backs of) the machines?
+
+___Have you ever formatted the wrong disk?
+___--Was this other disk important?
+___--Did the owner want to kill you?
+___--Were you able to unformat it successfully?
+___--Did the owner then treat you like a god?
+___--Do you thrive on being treated like a god?
+
+___Have you ever fried an important piece of hardware?
+___--Did it cost more than a month's salary?
+___--More than a year's?
+___--Did you tell anyone?
+___--Did you attempt to return it to the manufacturer and claim it didn't work when you got it?
+___--Has this happened more than once in a day?
+
+___Have you ever rebooted the system because it was easier to reboot then fix some problem with the system up?
+
+___When your hardware breaks, do you call your service provider and say 'I need a xyzzy NOW' and fix it yourself after hours, rather than just calling and asking them to do it?
+
+___If you actually let service providers touch your equipment, do you berate them for not using a wrist strap, not leaving the equipment plugged in, and other precautions?
+___--Do you disobey these yourself because you "know what you're doing"?
+
+___Have you ever watched the vendor's field circus take 3 hours to discover that a disk drive failure was caused by a capacitor on the controller that had lost all of its magic smoke, even though everyone could smell it and there were scorch marks on the board?
+
+___Do you make your own cables?
+___--Do they work?
+___--Have you ever wondered why anyone would *buy* a serial cable?
+
+___Have you ever built a SCSI chain with more than 3 different kinds of connectors?
+
+___Have you ever installed a SCSI bus or Ethernet cable that exceeded the specified maximum length by more than 50%?
+___--Did it work?
+
+___Have you ever strung 5 or more converters/tranceivers together to make a cable do something it was never intended?
+
+___Have you ever used an old disk drive as a door stop?
+___--Did people ask you what it was?
+___--Did you answer?
+___----With the right answer?
+___--Did they shake their heads?
+
+___How many versions of Sun's eeprom do you know how to program?
+
+___Have you ever toggled in a boot sequenece on a PDP/11?
+
+___Have you ever used a machine with more then ten blinking lights?
+
+___Have you ever mounted racks of fake led's to make your hardware look more impressive?
+
+___Have you ever "accidentally" unplugged your phone?
+
+___Have you ever manipulated a floppy disk?
+___--A hard disk?
+
+___Have you ever passed a fluid into your computer?
+
+___Do you clean the DAT-head with your wet fingertip?
+
+___Do you regard the humming of the vans of a computer as "a natural sound"?
+___--Can you not sleep without it?
+
+___Have you ever plugged a parallel printer into the external port of a AT bus tape drive controller?
+___--Did you understand what happened?
+
+___Have you ever plugged a Thicknet cable into a parallel port?
+
+___Have you ever used SMD drives?
+___--Did you install them correctly the first time?
+___--Did you get a hernia putting them into the rack?
+___--Have they caused you permanent deafness?
+___--Are they still running?
+___----Without overflowing their bad block tables?
+
+___Have you ever scheduled a down time for a production file server so that you could use one of its hardware components in a personal machine to bring up an operating system with a pathetically limited set of installation options?
+___--Did the production file server work afterwards?
+___--Was it back up in time?
+___--Did you wipe the operating system from the personal machine two days later because it was pathetically limited in other ways as well?
+
+Backups
+
+___Do you have *any* backups?
+
+Do you do backups:
+___--More than once a month?
+___--More than once a week?
+___--More than once a day?
+___--Did you start doing this after a crash?
+
+___Have you ever lied to your boss about having a current backup of the company database?
+___--Did he believe you?
+___--Do you have a current backup right now?
+
+___Do you verify your backups?
+___--Have you ever checked it, found it was okay, and later discovered it was an old backup, because the new backup never started?
+
+___Have you ever installed a SCSI tape drive and given it the same ID has your second hard disk?
+___--Did you then attempt to do a backup?
+___--Successfully?
+___--Did you manage to avoid getting fired?
+
+___Have you ever restored a user's file from tape?
+___--More than one file at a time?
+___--The same file more than once?
+___--Was it .Xauthority *sigh*?
+
+___Do you reliably do your own dumps before upgrading hardware/software?
+
+___Have you ever had to restore data because of your fuckup?
+
+___Have you ever had to restore data because of a vendor's fuckup?
+
+___Do you write protect your backup when you need to recover?
+___--Have you ever lost data because you didn't and got the restore wrong?
+
+___Have you ever typed "tar cvf /usr1/important_project /dev/rst0"?
+
+___Have you ever typed "tar cf ./filename ."?
+Did you realize the mistake:
+___--Right away?
+___--After 1 minute?
+___--After 5 minutes?
+___--After the filesystem filled?
+
+___Have you ever detarred a tarfile containing /bin/tar?
+___--Did you have to re-install the entire file system because of it?
+
+Filesystems
+
+___Does your fstab file have more than 4 entries in it?
+
+___Have you ever commented out a disk with homedirs on it from /etc/fstab?
+___--"/usr"?
+___--"/"?
+___--Did you do so deliberately?
+
+___Have you ever accidentally wiped out a partition through the careless use of metacharacters and rm -r?
+___--And then blamed it on a power surge?
+
+___Have you ever typed "rm -rf .*" to get rid of the files starting with '.'?
+___--Did you wonder why it was taking so long?
+
+___Have you ever newfs'ed the wrong partition?
+___--Did you remark on your mistake?
+___--Did you think that it was funny?
+___--Did your users think so, too?
+___----Did you care?
+
+___Have you ever newfs'ed a mounted partition?
+___--Was it "/"?
+___--Did you manage to save the data?
+
+___Have you ever had your swap and /usr partition overlap?
+___--Did you test it with a malloc(1>>31)?
+___--Did you catch it before the machine panic'd?
+___--Did you figure it out within 24 hours after the panics started?
+
+___Have you made plans for redoing the pre-defined partitions on your disks?
+___--Did you think them up within one year after installing?
+___--Within one month after installing?
+
+___Have you ever accidentally unmounted an active filesystem?
+___--Were you unable to remount it because your forgot the CFS password?
+___----Did you run a parallel DES cracker on every other machine available to recover the password?
+___------Did anybody notice?
+
+___Have you ever rm'ed a device file?
+___--Which was in use?
+___--Was it /dev/null?
+___--Was it /dev/console?
+
+___Have you ever linked /dev/null to /dev/audio?
+
+___Have you ever tried to boot up a system without a /dev directory?
+___--Did it work?
+
+___If the file system corrupts, and the /dev directory turns into a file, can you make a backup of critical data?
+___--Are you prepared to explain how to do this to someone on the other end of a long distance phone line, on a Sunday afternoon, while your significant other whines in the background because lunch is late?
+
+___Have you ever used fsdb to recover lost files?
+___--More that 2 times?
+
+___Have you ever used fsdb to reorder directory slot allocation because you couldn't be bothered doing it another way?
+___--Did it work?
+
+___If the first fifty inodes in a file system have been corrupted, can you recover the rest of the data?
+___--Are you prepared for the fact that no one will appreciate the difficulties involved in doing this, and that you will be hassled to "hurry up" the whole time you are doing it?
+
+___Have you ever swept your user partitions for suid executables?
+___--More than once?
+___--More than once a month?
+___--More than once a week?
+___--More than once a day?
+
+___Have you ever mounted your user partitions -nosuid?
+___-- -noexec?
+
+___Have you ever accidently deleted a *LARGE* amount of data from your company's database using query?
+___--Laughed at someone who did?
+___----Did they cry?
+___--Did you recover it?
+___--Would it have been quicker to retype it all in instead?
+
+___Do you have disk space allocated to each of your lost+found directories?
+___--Do you understand why there should be more than one block?
+
+___Do you run fsck and just say yes to everything?
+___--Do you conduct your personal relationships in the same way?
+
+Files and programs
+
+___Have you ever rm'ed /etc/passwd?
+___--And then logged out?
+___--And recovered it without reinstalling?
+
+___Have you changed a single file and caused 10 machines to crash?
+___--50?
+___--Over 100?
+
+___Have you ever accidentally pasted previously copied text to a root prompt?
+___--More than once?
+___--Did the paste turn out to be a valid command?
+___--Did you have to fix it afterwards?
+
+___Have you ever rebooted the wrong machine by forgetting you did an rlogin?
+___--Did you have the hostname as part of the prompt so you don't do that?
+
+___Have you ever said 'This adm3 is not adm3 compatible.. Oh, well.. I'll use ed'.?
+___--Was anyone impressed?
+___--Did you know how to use it?
+
+Processes
+
+___Have you ever killed a process of your own?
+___--Someone else's with their knowledge?
+___--Without their knowlege?
+___--Without *your* knowledge?
+
+___Have you ever exclusive-locked your processes on a CPU with mpcntl?
+
+___Have you ever set your shell to a real-time process with priocntl?
+
+___Have you ever put a multi-user system into single-user mode?
+___--Unintentionally?
+___--Did you continue to use the system, oblivious to the fact that all the other users were gone?
+
+___Have you ever kill -9 -1 'd a system to see what would happen?
+___--Without knowing what would happen?
+
+___Have you ever killed init accidentally?
+
+___Have you ever started two copies of init?
+___--Without knowing what would happen?
+
+___Have you ever tried to kill off another user, but killed one of your own windows instead 'cause you forgot you were using his account?
+
+___Do you warn users before rebooting?
+___--Do you just switch the damn thing off because you can't be bothered shutting all the apps down and warning the users and waiting...?
+___--Did you lie about what happened, afterwards?
+
+Operating systems
+
+___Do you use more than one operating system on your computer?
+___--More than three?
+___--More than five?
+___--Do you use just one, but it's one you wrote yourself?
+
+___Do you run more then 5 architectures?
+___--Is there less then 100 of one of them in existence?
+___----Did you port the OS to it yourself?
+
+___Have you ever sent a patch for a kernel bug to the OS manufacturer?
+___--And found it incorporated verbatim in the next release?
+
+___Have you ever compiled a kernel?
+___--Did you strip "options NFS" out of it?
+___--Did you strip "options SNIT" out of it?
+___--Did you strip "options TMPFS" out of it?
+___--Have you ever compiled one and needed the (unsaved) original version?
+___--Did you know how to fix that?
+___--Did you wait until morning to fix it?
+
+___Can you install a file/disk server?
+___--With Novell?
+___--With NFS?
+___--With both?
+
+___Can you install a diskless workstation with X?
+
+___Have you ever run an AIX system?
+___--Do you enjoy running an AIX system?
+
+___Have you ever installed more than 16MB of RAM in a machine running Xenix?
+___--Did you ever work out what was wrong?
+
+___Have you ever run a PDP-11 system?
+___--Have you ever used TECO?
+___----And understood it?
+___--Did you use TECO to gain access that you shouldn't have?
+
+___Have you ever used a Cray?
+
+___Have you ever used a Sun?
+___--A Sun 4?
+___--A Sun 3?
+___--A Sun 2?
+___--A Sun 1?
+
+___Have you ever administered an ftp site on a sun2?
+___--With more that 500 ftp sessions a day?
+___--With a custom ftpd?
+___--Which was not wu-ftpd?
+
+___Have you ever patched a running kernel then forget to patch the source?
+
+___Have you ever run ADB on the running kernel?
+
+___Have you ever typed ls in DOS or dir in unix?
+___--More than once a day?
+
+___Do you enjoy writing to /dev/mem and /dev/kmem directly?
+___--Do you enjoy letting all users do so?
+
+___Have you ever used "wc /dev/kmem" to figure out how much memory you have?
+
+___Are you sure that your homebox has no pirated software because you compiled it all from the source distribution?
+___--Did you recompile it all when it became time to switch binary types?
+
+___Do you own a Unix source code license?
+___--Do you use it?
+
+___Do you have a localisation checklist?
+___--Does it include "rm `which smit`"? (or sam, or admintool, or whatever..)
+___--Does it include "rm -rf /usr/openwin"?
+___--Does it include "Rewrite broken vendor programs"?
+___--Does it include "Port OS"?
+___--Does it include "Write OS"?
+___--Does it include "Build Hardware"?
+
+Programming
+
+___Do you know more programming languages than presidents?
+
+___Have you ever reverse engineered a program?
+___--Did it work afterward?
+___--Did you do it to get rid of those pesky "Not Registered" shareware messages?
+___--Did you put your own name in there to make it *look* like you were registered?
+
+___Have you ever spent your lunch hour trying to figure out a more efficient way to code a program that already takes less than 30 seconds to run?
+
+___Have you ever written a utility that performed a task already implemented in a standard system utility?
+___--Was it on "company time"?
+___--Did somebody find out later?
+___--Did you tell them it was "research"?
+___--Did they believe you?
+
+___Have you ever had to fix a binary with emacs?
+___--Did it actually work?
+___--Was it a kernel?
+
+___Do you know how to use /bin/ed?
+___--Do you prefer to use /bin/ed?
+___--Do you miss teco?
+
+___Do you access friends' private parts in C++?
+
+___Do you access friends' protected parts in C++?
+
+___Have you ever made a.out?
+___--More than five times in one night?
+___--Without making clean afterwards?
+___--Did you have a child process?
+___--Did you abort(2)?
+
+___Have you ever had to kill an infinite fork() program?
+___--Was it yours?
+
+___Have you ever had a user claim they wrote an infinite fork() program "accidentally"?
+
+___Have you ever accidentally wedged the system because you ran your daemon at a negative nice value before it was completely debugged?
+
+___Have you ever written a daemon to log some facet of system performance that is not normally logged?
+
+___Has any recreational programming project ever prevented others from getting work done?
+___--Did you blame the resultant [full disk|lack of inodes|high load average] on some application?
+
+___Have you ever used a script to run a command on 2 separate systems at once?
+___--16 systems?
+___--64 systems?
+___--1024 systems?
+___--Did it crash them all?
+
+___Do you comment your {shell scripts, perl scripts, C, ...} properly?
+___--At all?
+
+___Have you ever had to spend an hour rereading code you wrote to figure out what it does, and why you wrote it?
+
+Mail and news
+
+___Do you have the shortest possible E-mail address?
+
+___Have you ever read another user's mail?
+
+___Have you ever had a user run into your office and say (breathlessly) "STOP THAT EMAIL MESSAGE!"
+___--Did you?
+___--Was it Internet mail, out-bound?
+___----To a site you do not administer, and have no legitimate access to?
+
+___Is email to "manager" or "help" funneled into a queue at your site?
+___--Is the queue funneled into /dev/null?
+
+___Have you ever fixed your sendmail.cf?
+___--Did it need it?
+
+___Did you give up on sendmail.cf 3 lines past the file header comments?
+
+___Can you understand sendmail rulesets?
+___--Have you ever written one of your own?
+
+___Have you ever written a sendmail.cf file from scratch?
+___--Was there a gun pointed to your head at the time?
+___--Were you under the influence of any controlled substances?
+
+___Have you ever edited the m4 source to sendmail.cf?
+
+___Have you ever edited sendmail.cf for a site with IP, UUCP, Decnet and bitnet connections?
+
+___Do you have default routing for pseudo-domain E-Mail?
+
+___Does your sendmail.cf handle percent-pathed Internet E-Mail?
+___--Bang-pathed?
+___--Comma-pathed?
+
+___Do you know of any bugs in your version of sendmail (or mmdf...)?
+
+___Have you ever built a cnews, nntp or inn server?
+___--Did you fix it?
+___--Many times?
+
+___Have you ever created a newsgroup?
+___--Did it contain copies of all outgoing user articles from your site?
+___--All outgoing user email from your site?
+
+Printing
+
+___Have you ever installed a printer?
+___--On System V?
+___--Without using an administration tool?
+
+___Have you ever deleted someone else's print job because the queue stopped?
+
+___Have you ever deleted someone else's print job so you can send your print job faster?
+
+Telnet
+
+Have you:
+___Used telnet to read mail?
+___Used telnet to send mail?
+___Used telnet to read and post news?
+___Used telnet as a web browser?
+___Used telnet as a diagnostic tool?
+___Used telnet as an X client?
+___Used telnet to get the time of day in California?
+___Used telnet to finger people?
+
+Books
+
+___Do you own more than 5 O'Reilly books?
+___--10?
+___--All of them?
+___--Were they put on company bill?
+
+___Have you written an O'Reilly Book?
+
+___Do you own a copy of the Orange Book?
+___--Have you read it?
+
+___Have you ever bought a UNIX Security book?
+___--Did you use it to hack into someone else's system?
+___----Your own system?
+
+___Have you ever taken RFCs home to read?
+___--Quoted them to your SO in bed?
+___--Do you leave them out on the coffee table and in the car so people know how smart you are?
+
+___Have you written an RFC?
+
+___Have you ever read the original Bell Labs documentation for lex/yacc?
+___--vi?
+___--ed?
+
+Personal
+___Do you have 'The Magic Touch'? :-)
+
+___Have you ever just walked into a room to troubleshoot a computer and have "the problem" mysteriously go away?
+___--Does this happen all the time?
+
+___Do the lights dim when you enter?
+
+___Have you ever awakened in the middle of the night, not knowing whose keyboard your head was resting on?
+
+___Do you fantasize that you're roling in mud?
+
+___Have you ever do more than talk(1)?
+
+___Have you ever finger(1)'d a cute user?
+___--More than one?
+___--An entire system?
+
+___Do you like to view(1) files without close(2)?
+___--Did you strip(1) the file yourself?
+
+___Have you ever wanted more(1)?
+
+___Have you ever abused a cat(1)?
+
+___Have you ever gotten a free lunch out of your boss by betting on what the problem is?
+___--Did he cause the problem?
+
+___Have you ever told a newbie that the "any" key is the big switch labled "1/0"?
+___--Did you deny it when confronted by your boss?
+
+___Have you ever set up a "God" account so you could send system messages to newbies that say "Message from God:..."?
+___--Did the newbie then run to your office and say "Come quick! Look at this!"?
+___--Do you do this regularly?
+___--Has noone figured it out yet?
+
+Is your home directory larger than:
+___--Any luser at your site?
+___--Any 10 lusers at your site?
+___--The combined storage capacity of wuarchive.wustl.edu and ftp.uu.net?
+
+___Have you ever used uucp to have the computer call you at home?
+___--you, not your computer?
+___--Used it as an alarm clock?
+___--Offered it as a service to others?
+
+___Have you ever sent talk requests to other users as root?
+
+___Have you ever sent talk requests to yourself?
+
+___Have you ever sent talk requests to Vicki Brown?
+
+___Can you do three or more of the following without leaving your desk:
+
+    listen to music
+    play CDs
+    talk on telephone
+    write on whiteboard
+    throw darts
+    scan in papers
+    send/receive faxes
+    microwave your snacks
+    pull out a "cold one" from the fridge
+    play
+        8mm tapes
+        4mm tapes
+        QIC tapes
+        9-track reels
+
+___Have you ever chipped in for a coke machine in your office?
+___--Do you now have one?
+___--Do you have slabs delivered to the door every week?
+
+___Do you have the pizza delivery company's number right under the 'emergency contacts' list handy to your phone?
+
+___Have you ever used the phrase RTFM?
+___--Shouted it?
+___--Do you own a button with it that you wear around?
+
+___Have you ever been to Usenix?
+___Have you ever been to Lisa?
+___--Have you published a paper at one of them?
+___--Were you in the "in" crowd at these conferences?
+
+___Do you have a couch in your machine room?
+___A stereo?
+___A bed?
+___A TV?
+___--Do you use them all regularily?
+
+___Do you read computer magazines?
+___--Do you admit it?
+
+___Do you MUD/MUCK/MUSH from work?
+
+___Have you ever swamped the network with xtrek or xpilot traffic?
+___--Were you able to convince your boss that your site needs a faster network for "mission-critical applications"?
+
+___Have you ever "decorated" your monitor/computer?
+
+___Have you ever receive root mail complaining about a user's actions?
+___--Was the user you?
+
+___Have you ever been so perplexed by a problem that when someone walks by and says, "hello", you respond with, "OK, and you?"
+
+BOFH
+
+___Do you read the BOFH for inspiration?
+___--Have you ever followed any of the examples? <clickety click>
+
+___Have you created a bofh.* newsgroup?
+
+___Have you ever set a user's password minimum length to something greater than 30 characters?
+___--How about that and the expiration time to 1 minute?
+
+___Have you ever set a user's home directory to /dev/null?
+
+___Have you ever emailed a core dump to someone who continuously leaves a core dump every time s/he logs off the machine?
+
+___Do you ever run your jobs with negative nice values?
+
+___Have you ever shutdown the system during peak time?
+___--With no notice?
+
+___Have you ever lied to your users about the regularity of your backup schedule?
+___--Without having a backup schedule?
+___--Without having a backup device?
+
+Have you ever done any of the following:
+___ # cd ~user; touch \*
+___ # ln -s /dev/null /var/spool/mail/user
+___ # echo "echo 'You have new mail.'" >> ~user/.cshrc
+___ # chmod -R 000 ~user/*
+
+Meta-questions
+
+___Have you submitted a question in this test?
+___Did you understand every question on this test?
