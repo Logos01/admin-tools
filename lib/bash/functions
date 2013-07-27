@@ -35,6 +35,11 @@ function ssh_addhost(){
         fqdn=${host}
     fi	
     ip=$(dig +short ${fqdn})
+    if [ ! "$ip" ] ; then
+        if [[ $fqdn =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+            ip=${fqdn}
+        fi
+    fi
     if [ "$ip" ] ; then
         host_str="$(ssh-keyscan $fqdn | sed "s/ ssh-rsa/,${ip} ssh-rsa/")" 
 	echo "${host_str}" >> ~/.ssh/known_hosts
