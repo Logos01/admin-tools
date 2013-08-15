@@ -37,8 +37,7 @@ def decryptPass():
     gpg = gnupg.GPG(gnupghome='%s/.gnupg/' % home)
 
     encrypted_pass = ''
-    for x in open('%s/.ssh/passtext.gpg' % home,'r').readlines():
-        encrypted_pass += x
+    encrypted_pass = open('%s/.ssh/passtext.gpg' % home,'r').read()
 
     decrypted_pass = gpg.decrypt(encrypted_pass).data
     decrypted_pass = decrypted_pass.strip('\n')
