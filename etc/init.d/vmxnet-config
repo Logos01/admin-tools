@@ -1,0 +1,67 @@
+#!/bin/sh
+# vmxnet-config startup 'daemon'
+# chkconfig: 345 09 80
+# description: vmxnet-config startup 'daemon'
+# processname: vmware-config-tools.pl
+
+. /etc/rc.d/init.d/functions
+
+DAEMON_PATH="/usr/bin/vmware-config-tools.pl"
+DAEMON=vmxnet-config
+DAEMONOPTS="--default"
+
+NAME="vmxnet-config"
+DESC="vmxnet-config startup 'daemon'"
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+
+start() {
+	echo -n $"Starting $NAME: "
+	ETH0_EXISTS="`ifconfig -a | grep -i eth0`"
+	if [ "$ETH0_EXISTS" = "" ] ; then
+		/usr/bin/vmware-config-tools.pl --default 2>&1 1>/dev/null
+		RETVAL=$?
+	else
+		RETVAL=0
+	fi
+	if [ $RETVAL -eq 0 ] ; then
+		success
+	else
+		failure
+	fi
+	echo
+}
+
+stop() {
+	echo $"Stopping $NAME: "
+	if [ "`pgrep vmware-config-tools.pl`" != "" ]; then
+		pkill vmware-config-tools.pl 2>&1 1>/dev/null
+		RETVAL=$?
+	else
+		RETVAL=0
+	fi
+	if [ $RETVAL -eq 0 ] ; then
+		success
+	else
+		failure
+	fi
+	echo
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+exit $RETVAL
