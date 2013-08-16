@@ -38,7 +38,7 @@ start)
 status)
         printf "%-50s" "Checking $NAME..."
 	/usr/sbin/ferm -nl /etc/ferm.conf 2>&1
-	printf "%-50s" "Be sure to also check iptables output...\n"
+	printf "%-50s\n" "Be sure to also check iptables output..."
 #        if [ -f $PIDFILE ]; then
 #            PID=`cat $PIDFILE`
 #            if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
