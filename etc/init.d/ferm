@@ -34,6 +34,7 @@ start)
 #            echo $PID > $PIDFILE
 #            printf "%s\n" "Ok"
 #        fi
+	echo ""
 ;;
 status)
         printf "%-50s" "Checking $NAME..."
@@ -66,6 +67,7 @@ stop)
 #        else
 #            printf "%s\n" "pidfile not found"
 #        fi
+	echo ""
 ;;
 
 restart)
