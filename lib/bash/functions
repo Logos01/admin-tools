@@ -33,7 +33,10 @@ function ssh_addhost(){
         fqdn=${host}.${domain}
     else
         fqdn=${host}
-    fi	
+    fi
+    if [ ! "$ip" ] ; then
+         ip=$(awk "/$fqdn/ {print \$1}" /etc/hosts)
+    fi
     ip=$(dig +short ${fqdn})
     if [ ! "$ip" ] ; then
         if [[ $fqdn =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
@@ -49,7 +52,7 @@ function ssh_addhost(){
             echo "    Hostname ${host}.${domain}"
             echo "    User     $user"
         ) >> ~/.ssh/config
-        sshpass -f ~/.ssh/passtext ssh-copy-id -i ~/.ssh/id_rsa $host
+        sshpass -f ~/.ssh/passtext ssh-copy-id -i ~/.ssh/id_rsa $fqdn
     else
         echo "${fqdn} has no known DNS entry. No actions performed."
     fi
