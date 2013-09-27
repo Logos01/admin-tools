@@ -4,6 +4,8 @@
 # description: ferm daemon
 # processname: ferm
 
+. /etc/rc.d/init.d/functions
+
 DAEMON_PATH="/usr/sbin/ferm"
 
 DAEMON=ferm
@@ -19,10 +21,9 @@ start)
 	printf "%-50s" "Starting $NAME..."
 	ferm -nl /etc/ferm.conf 1>/dev/null 2>&1
 	if [ ! $? -eq 0 ] ; then
-		printf "%s\n" "Fail" 
+		fail
 	else
-		/usr/sbin/ferm /etc/ferm.conf
-		printf "%s\n" "Ok"
+		/usr/sbin/ferm /etc/ferm.conf && success || fail
 	fi
 #	cd $DAEMON_PATH
 #	PID=`$DAEMON $DAEMONOPTS > /dev/null 2>&1 & echo $!`
@@ -33,10 +34,12 @@ start)
 #            echo $PID > $PIDFILE
 #            printf "%s\n" "Ok"
 #        fi
+	echo ""
 ;;
 status)
         printf "%-50s" "Checking $NAME..."
 	/usr/sbin/ferm -nl /etc/ferm.conf 2>&1
+	printf "%-50s\n" "Be sure to also check iptables output..."
 #        if [ -f $PIDFILE ]; then
 #            PID=`cat $PIDFILE`
 #            if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
@@ -50,11 +53,12 @@ status)
 ;;
 stop)
         printf "%-50s" "Stopping $NAME"
-	ferm -F /etc/ferm.conf
-	iptables -P INPUT ACCEPT
-	iptables -P OUTPUT ACCEPT
-	iptables -P FORWARD ACCEPT
-	printf "%s\n" "Ok"
+	ferm -F /etc/ferm.conf      && \
+	iptables -P INPUT ACCEPT    && \
+	iptables -P OUTPUT ACCEPT   && \
+	iptables -P FORWARD ACCEPT  && \
+	success                     || \
+	fail
 #            cd $DAEMON_PATH
 #        if [ -f $PIDFILE ]; then
 #            kill -HUP $PID
@@ -63,6 +67,7 @@ stop)
 #        else
 #            printf "%s\n" "pidfile not found"
 #        fi
+	echo ""
 ;;
 
 restart)
