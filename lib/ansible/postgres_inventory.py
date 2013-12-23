@@ -113,7 +113,7 @@ def options_list(options, ansible_items):
         print json.dumps(ansible_items)
 
 
-def options_host(options, ansible_items):
+def options_host(options, host_inventory, ansible_items):
     vars = {}
     for group in ansible_items.keys():
         if options.host in ansible_items[group]['hosts']:
@@ -121,6 +121,10 @@ def options_host(options, ansible_items):
                 vars[vkey] = vval
         else:
             vars['Null'] = 'Null'
+
+    for host_details in host_inventory:
+        if options.host in host_details[0]:
+            vars['ansible_ssh_host'] = host_details[1].replace('/32', '')
 
     if options.human:
         print 'Host: %s' % (options.host, )
@@ -152,7 +156,7 @@ def main():
         options_list(options, ansible_items)
 
     elif options.host:
-        options_host(options, ansible_items)
+        options_host(options, host_inventory, ansible_items)
 
 
 if __name__ == '__main__':
