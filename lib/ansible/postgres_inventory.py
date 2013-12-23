@@ -9,9 +9,9 @@ from optparse import OptionParser
 def establish_connection():
     global conn
     dbname = 'inventory'
-    username = 'logos'
+    username = 'username'
     hostname = '127.0.0.1'
-    password = 'logos'
+    password = 'password'
     connection = "dbname='%s' user='%s' host='%s' password='%s'"
     connection = connection % (
         dbname,
