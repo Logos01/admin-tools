@@ -7,7 +7,6 @@ from optparse import OptionParser
 
 
 def establish_connection():
-    global conn
     dbname = 'inventory'
     username = 'username'
     hostname = '127.0.0.1'
@@ -37,7 +36,7 @@ def obtain_data():
     host_groups = cur.fetchall()
     cur.execute('SELECT groupname, var_name, var_value FROM group_vars')
     group_vars = cur.fetchall()
-    cur.execute('SELECT hostname, ipaddr, in_dns from host_inventory')
+    cur.execute('SELECT hostname, ipaddr, in_dns FROM host_inventory')
     host_inventory = cur.fetchall()
     return (groups, host_groups, group_vars, host_inventory)
 
@@ -136,7 +135,6 @@ def options_host(options, host_inventory, ansible_items):
 
 def main():
     parser = parse_options()
-    global options
     (options, args) = parser.parse_args()
 
     (
