@@ -8,6 +8,35 @@ SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
+--
+-- Name: inventory; Type: DATABASE; Schema: -; Owner: -
+--
+
+CREATE DATABASE inventory WITH TEMPLATE = template0 ENCODING = 'SQL_ASCII' LC_COLLATE = 'C' LC_CTYPE = 'C' TABLESPACE = inventory;
+
+
+\connect inventory
+
+SET statement_timeout = 0;
+SET client_encoding = 'SQL_ASCII';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
 SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
@@ -15,7 +44,7 @@ SET default_tablespace = '';
 SET default_with_oids = true;
 
 --
--- Name: group_vars; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+-- Name: group_vars; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE group_vars (
@@ -26,10 +55,8 @@ CREATE TABLE group_vars (
 );
 
 
-ALTER TABLE public.group_vars OWNER TO logos;
-
 --
--- Name: group_vars_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+-- Name: group_vars_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE group_vars_primary_key_seq
@@ -40,17 +67,15 @@ CREATE SEQUENCE group_vars_primary_key_seq
     CACHE 1;
 
 
-ALTER TABLE public.group_vars_primary_key_seq OWNER TO logos;
-
 --
--- Name: group_vars_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+-- Name: group_vars_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE group_vars_primary_key_seq OWNED BY group_vars.primary_key;
 
 
 --
--- Name: groups; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+-- Name: groups; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE groups (
@@ -61,10 +86,8 @@ CREATE TABLE groups (
 );
 
 
-ALTER TABLE public.groups OWNER TO logos;
-
 --
--- Name: groups_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+-- Name: groups_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE groups_primary_key_seq
@@ -75,10 +98,8 @@ CREATE SEQUENCE groups_primary_key_seq
     CACHE 1;
 
 
-ALTER TABLE public.groups_primary_key_seq OWNER TO logos;
-
 --
--- Name: groups_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+-- Name: groups_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE groups_primary_key_seq OWNED BY groups.primary_key;
@@ -87,7 +108,7 @@ ALTER SEQUENCE groups_primary_key_seq OWNED BY groups.primary_key;
 SET default_with_oids = false;
 
 --
--- Name: host_groups; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+-- Name: host_groups; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE host_groups (
@@ -97,10 +118,8 @@ CREATE TABLE host_groups (
 );
 
 
-ALTER TABLE public.host_groups OWNER TO logos;
-
 --
--- Name: host_groups_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+-- Name: host_groups_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE host_groups_primary_key_seq
@@ -111,10 +130,8 @@ CREATE SEQUENCE host_groups_primary_key_seq
     CACHE 1;
 
 
-ALTER TABLE public.host_groups_primary_key_seq OWNER TO logos;
-
 --
--- Name: host_groups_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+-- Name: host_groups_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE host_groups_primary_key_seq OWNED BY host_groups.primary_key;
@@ -123,7 +140,7 @@ ALTER SEQUENCE host_groups_primary_key_seq OWNED BY host_groups.primary_key;
 SET default_with_oids = true;
 
 --
--- Name: host_inventory; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+-- Name: host_inventory; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE host_inventory (
@@ -141,10 +158,8 @@ CREATE TABLE host_inventory (
 );
 
 
-ALTER TABLE public.host_inventory OWNER TO logos;
-
 --
--- Name: host_inventory_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+-- Name: host_inventory_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE host_inventory_primary_key_seq
@@ -155,10 +170,8 @@ CREATE SEQUENCE host_inventory_primary_key_seq
     CACHE 1;
 
 
-ALTER TABLE public.host_inventory_primary_key_seq OWNER TO logos;
-
 --
--- Name: host_inventory_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+-- Name: host_inventory_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE host_inventory_primary_key_seq OWNED BY host_inventory.primary_key;
@@ -167,7 +180,7 @@ ALTER SEQUENCE host_inventory_primary_key_seq OWNED BY host_inventory.primary_ke
 SET default_with_oids = false;
 
 --
--- Name: hostnames; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+-- Name: hostnames; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE hostnames (
@@ -176,10 +189,8 @@ CREATE TABLE hostnames (
 );
 
 
-ALTER TABLE public.hostnames OWNER TO logos;
-
 --
--- Name: hostnames_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+-- Name: hostnames_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE hostnames_primary_key_seq
@@ -190,17 +201,15 @@ CREATE SEQUENCE hostnames_primary_key_seq
     CACHE 1;
 
 
-ALTER TABLE public.hostnames_primary_key_seq OWNER TO logos;
-
 --
--- Name: hostnames_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+-- Name: hostnames_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE hostnames_primary_key_seq OWNED BY hostnames.primary_key;
 
 
 --
--- Name: ipaddrs; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+-- Name: ipaddrs; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE ipaddrs (
@@ -209,10 +218,8 @@ CREATE TABLE ipaddrs (
 );
 
 
-ALTER TABLE public.ipaddrs OWNER TO logos;
-
 --
--- Name: ipaddrs_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+-- Name: ipaddrs_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 CREATE SEQUENCE ipaddrs_primary_key_seq
@@ -223,59 +230,57 @@ CREATE SEQUENCE ipaddrs_primary_key_seq
     CACHE 1;
 
 
-ALTER TABLE public.ipaddrs_primary_key_seq OWNER TO logos;
-
 --
--- Name: ipaddrs_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+-- Name: ipaddrs_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
 ALTER SEQUENCE ipaddrs_primary_key_seq OWNED BY ipaddrs.primary_key;
 
 
 --
--- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY group_vars ALTER COLUMN primary_key SET DEFAULT nextval('group_vars_primary_key_seq'::regclass);
 
 
 --
--- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY groups ALTER COLUMN primary_key SET DEFAULT nextval('groups_primary_key_seq'::regclass);
 
 
 --
--- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY host_groups ALTER COLUMN primary_key SET DEFAULT nextval('host_groups_primary_key_seq'::regclass);
 
 
 --
--- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY host_inventory ALTER COLUMN primary_key SET DEFAULT nextval('host_inventory_primary_key_seq'::regclass);
 
 
 --
--- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY hostnames ALTER COLUMN primary_key SET DEFAULT nextval('hostnames_primary_key_seq'::regclass);
 
 
 --
--- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY ipaddrs ALTER COLUMN primary_key SET DEFAULT nextval('ipaddrs_primary_key_seq'::regclass);
 
 
 --
--- Name: PrimaryKey_hostname; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: PrimaryKey_hostname; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY hostnames
@@ -283,7 +288,7 @@ ALTER TABLE ONLY hostnames
 
 
 --
--- Name: PrimaryKey_ipaddrs; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: PrimaryKey_ipaddrs; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY ipaddrs
@@ -291,7 +296,7 @@ ALTER TABLE ONLY ipaddrs
 
 
 --
--- Name: host_groups_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: host_groups_primary_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY host_groups
@@ -299,7 +304,15 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- Name: host_inventory_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: host_groups_unique_matching; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY host_groups
+    ADD CONSTRAINT host_groups_unique_matching UNIQUE (hostname, groupname);
+
+
+--
+-- Name: host_inventory_primary_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY host_inventory
@@ -307,7 +320,7 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- Name: primary_key_group_vars; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: primary_key_group_vars; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY group_vars
@@ -315,7 +328,7 @@ ALTER TABLE ONLY group_vars
 
 
 --
--- Name: primary_key_groups; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: primary_key_groups; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY groups
@@ -323,7 +336,7 @@ ALTER TABLE ONLY groups
 
 
 --
--- Name: unique_group_names; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: unique_group_names; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY groups
@@ -331,7 +344,7 @@ ALTER TABLE ONLY groups
 
 
 --
--- Name: unique_hostname; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: unique_hostname; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY hostnames
@@ -339,7 +352,7 @@ ALTER TABLE ONLY hostnames
 
 
 --
--- Name: unique_ipaddrs; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+-- Name: unique_ipaddrs; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY ipaddrs
@@ -347,56 +360,56 @@ ALTER TABLE ONLY ipaddrs
 
 
 --
--- Name: fki_Unique_ipaddrs; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_Unique_ipaddrs; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX "fki_Unique_ipaddrs" ON host_inventory USING btree (ipaddr);
 
 
 --
--- Name: fki_group_vars_groupname_foreign; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_group_vars_groupname_foreign; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX fki_group_vars_groupname_foreign ON group_vars USING btree (groupname);
 
 
 --
--- Name: fki_host_groups_foreign_groupnames; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_host_groups_foreign_groupnames; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX fki_host_groups_foreign_groupnames ON host_groups USING btree (groupname);
 
 
 --
--- Name: fki_host_groups_foreign_hostnames; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_host_groups_foreign_hostnames; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX fki_host_groups_foreign_hostnames ON host_groups USING btree (hostname);
 
 
 --
--- Name: fki_host_groups_inventory_foreign; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_host_groups_inventory_foreign; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX fki_host_groups_inventory_foreign ON host_groups USING btree (hostname);
 
 
 --
--- Name: fki_host_inventory_foreign_hostnames; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_host_inventory_foreign_hostnames; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX fki_host_inventory_foreign_hostnames ON host_inventory USING btree (hostname);
 
 
 --
--- Name: fki_host_inventory_foreign_ipaddrs; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
+-- Name: fki_host_inventory_foreign_ipaddrs; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX fki_host_inventory_foreign_ipaddrs ON host_inventory USING btree (ipaddr);
 
 
 --
--- Name: group_vars_groupname_foreign; Type: FK CONSTRAINT; Schema: public; Owner: logos
+-- Name: group_vars_groupname_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY group_vars
@@ -404,7 +417,7 @@ ALTER TABLE ONLY group_vars
 
 
 --
--- Name: host_groups_foreign_groupnames; Type: FK CONSTRAINT; Schema: public; Owner: logos
+-- Name: host_groups_foreign_groupnames; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY host_groups
@@ -412,7 +425,7 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- Name: host_groups_foreign_hostnames; Type: FK CONSTRAINT; Schema: public; Owner: logos
+-- Name: host_groups_foreign_hostnames; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY host_groups
@@ -420,7 +433,7 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- Name: host_inventory_foreign_hostnames; Type: FK CONSTRAINT; Schema: public; Owner: logos
+-- Name: host_inventory_foreign_hostnames; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY host_inventory
@@ -428,7 +441,7 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- Name: host_inventory_foreign_ipaddrs; Type: FK CONSTRAINT; Schema: public; Owner: logos
+-- Name: host_inventory_foreign_ipaddrs; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY host_inventory
@@ -436,7 +449,7 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- Name: public; Type: ACL; Schema: -; Owner: postgres
+-- Name: public; Type: ACL; Schema: -; Owner: -
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
