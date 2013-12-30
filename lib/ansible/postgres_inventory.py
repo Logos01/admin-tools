@@ -7,8 +7,9 @@ from optparse import OptionParser
 
 
 def establish_connection():
+    global conn
     dbname = 'inventory'
-    username = 'username'
+    username = 'user'
     hostname = '127.0.0.1'
     password = 'password'
     connection = "dbname='%s' user='%s' host='%s' password='%s'"
@@ -36,12 +37,12 @@ def obtain_data():
     host_groups = cur.fetchall()
     cur.execute('SELECT groupname, var_name, var_value FROM group_vars')
     group_vars = cur.fetchall()
-    cur.execute('SELECT hostname, ipaddr, in_dns FROM host_inventory')
+    cur.execute('SELECT hostname, ipaddr, in_dns, online from host_inventory')
     host_inventory = cur.fetchall()
     return (groups, host_groups, group_vars, host_inventory)
 
 
-def convert_groups(groups, host_groups, ansible_items):
+def convert_groups(groups, host_groups, ansible_items,):
     for x in groups:
         if not x[0] in ansible_items.keys():
             ansible_items[x[0]] = []
@@ -56,7 +57,8 @@ def convert_groups(groups, host_groups, ansible_items):
             ansible_items[x[1]] += ansible_items[x[0]]
 
 
-def parse_group_vars(group_vars, parsed_group_vars, ansible_items):
+def parse_group_vars(parse_args):
+    group_vars, parsed_group_vars, host_inventory, ansible_items = parse_args
     for x in group_vars:
         try:
             parsed_group_vars[x[0]][x[1]] = x[2]
@@ -67,6 +69,15 @@ def parse_group_vars(group_vars, parsed_group_vars, ansible_items):
     for key, value in ansible_items.items():
         ansible_items[key] = {}
         ansible_items[key]['hosts'] = value
+        to_delete = []
+        for host in ansible_items[key]['hosts']:
+            entries = [x for x in host_inventory if x[0] == host]
+            for entry in entries:
+                if not entry[3]:
+                    to_delete += [host, ]
+        ansible_items[key]['hosts'] = [
+            x for x in ansible_items[key]['hosts'] if not x in to_delete
+        ]
         try:
             ansible_items[key]['vars'] = parsed_group_vars[key]
         except KeyError:
@@ -77,8 +88,14 @@ def convert_sql_to_dict(groups, host_groups, group_vars, host_inventory):
     ansible_items = {}
     parsed_group_vars = {}
 
-    convert_groups(groups, host_groups, ansible_items)
-    parse_group_vars(group_vars, parsed_group_vars, ansible_items)
+    convert_groups(groups, host_groups, ansible_items,)
+    parse_args = (
+        group_vars,
+        parsed_group_vars,
+        host_inventory,
+        ansible_items,
+    )
+    parse_group_vars(parse_args)
 
     return ansible_items
 
@@ -122,7 +139,7 @@ def options_host(options, host_inventory, ansible_items):
             vars['Null'] = 'Null'
 
     for host_details in host_inventory:
-        if options.host in host_details[0]:
+        if options.host in host_details[0] and not host_details[2]:
             vars['ansible_ssh_host'] = host_details[1].replace('/32', '')
 
     if options.human:
@@ -135,6 +152,7 @@ def options_host(options, host_inventory, ansible_items):
 
 def main():
     parser = parse_options()
+    global options
     (options, args) = parser.parse_args()
 
     (
