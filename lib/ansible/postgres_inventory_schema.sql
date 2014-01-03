@@ -105,6 +105,45 @@ CREATE SEQUENCE groups_primary_key_seq
 ALTER SEQUENCE groups_primary_key_seq OWNED BY groups.primary_key;
 
 
+--
+-- Name: host_inventory; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE host_inventory (
+    hostname character varying(20),
+    ipaddr cidr,
+    access_method character varying(10),
+    online boolean DEFAULT true NOT NULL,
+    description character varying(90),
+    row_is_obsolete boolean NOT NULL,
+    primary_key integer NOT NULL,
+    in_dns boolean,
+    os character varying(20),
+    os_version character varying(20),
+    oob_access_method character varying,
+    oob_access_address character varying(50)
+);
+
+
+--
+-- Name: network_segments; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE network_segments (
+    primary_key integer NOT NULL,
+    inet_segment cidr,
+    segment_description character varying(50)
+);
+
+
+--
+-- Name: host_details; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW host_details AS
+    SELECT host_inventory.hostname, host_inventory.ipaddr, host_inventory.access_method, host_inventory.online, host_inventory.description, host_inventory.row_is_obsolete, host_inventory.in_dns, host_inventory.os, host_inventory.os_version, host_inventory.oob_access_method, host_inventory.oob_access_address, network_segments.segment_description FROM (host_inventory JOIN network_segments ON (((network_segments.inet_segment)::inet >> (host_inventory.ipaddr)::inet)));
+
+
 SET default_with_oids = false;
 
 --
@@ -137,27 +176,6 @@ CREATE SEQUENCE host_groups_primary_key_seq
 ALTER SEQUENCE host_groups_primary_key_seq OWNED BY host_groups.primary_key;
 
 
-SET default_with_oids = true;
-
---
--- Name: host_inventory; Type: TABLE; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE TABLE host_inventory (
-    hostname character varying(20),
-    ipaddr cidr,
-    access_method character varying(10),
-    online boolean DEFAULT true NOT NULL,
-    description character varying(90),
-    row_is_obsolete boolean NOT NULL,
-    primary_key integer NOT NULL,
-    in_dns boolean,
-    drac_address cidr,
-    os character varying(20),
-    os_version character varying(20)
-);
-
-
 --
 -- Name: host_inventory_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
@@ -176,8 +194,6 @@ CREATE SEQUENCE host_inventory_primary_key_seq
 
 ALTER SEQUENCE host_inventory_primary_key_seq OWNED BY host_inventory.primary_key;
 
-
-SET default_with_oids = false;
 
 --
 -- Name: hostnames; Type: TABLE; Schema: public; Owner: -; Tablespace: 
@@ -238,6 +254,54 @@ ALTER SEQUENCE ipaddrs_primary_key_seq OWNED BY ipaddrs.primary_key;
 
 
 --
+-- Name: network_segments_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE network_segments_primary_key_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: network_segments_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE network_segments_primary_key_seq OWNED BY network_segments.primary_key;
+
+
+--
+-- Name: oob_access_methods; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE oob_access_methods (
+    primary_key integer NOT NULL,
+    oob_access_method character varying(50) NOT NULL
+);
+
+
+--
+-- Name: oob_access_methods_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE oob_access_methods_primary_key_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: oob_access_methods_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE oob_access_methods_primary_key_seq OWNED BY oob_access_methods.primary_key;
+
+
+--
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -277,6 +341,20 @@ ALTER TABLE ONLY hostnames ALTER COLUMN primary_key SET DEFAULT nextval('hostnam
 --
 
 ALTER TABLE ONLY ipaddrs ALTER COLUMN primary_key SET DEFAULT nextval('ipaddrs_primary_key_seq'::regclass);
+
+
+--
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY network_segments ALTER COLUMN primary_key SET DEFAULT nextval('network_segments_primary_key_seq'::regclass);
+
+
+--
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY oob_access_methods ALTER COLUMN primary_key SET DEFAULT nextval('oob_access_methods_primary_key_seq'::regclass);
 
 
 --
@@ -320,6 +398,22 @@ ALTER TABLE ONLY host_inventory
 
 
 --
+-- Name: oob_access_method_primary_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY oob_access_methods
+    ADD CONSTRAINT oob_access_method_primary_key PRIMARY KEY (primary_key);
+
+
+--
+-- Name: oob_access_method_uniqueness; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY oob_access_methods
+    ADD CONSTRAINT oob_access_method_uniqueness UNIQUE (oob_access_method);
+
+
+--
 -- Name: primary_key_group_vars; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -333,6 +427,22 @@ ALTER TABLE ONLY group_vars
 
 ALTER TABLE ONLY groups
     ADD CONSTRAINT primary_key_groups PRIMARY KEY (primary_key);
+
+
+--
+-- Name: segment_list_primary_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY network_segments
+    ADD CONSTRAINT segment_list_primary_key PRIMARY KEY (primary_key);
+
+
+--
+-- Name: segment_list_unique_subnets; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY network_segments
+    ADD CONSTRAINT segment_list_unique_subnets UNIQUE (inet_segment);
 
 
 --
@@ -409,6 +519,13 @@ CREATE INDEX fki_host_inventory_foreign_ipaddrs ON host_inventory USING btree (i
 
 
 --
+-- Name: fki_host_inventory_oob_access_method_foreign_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX fki_host_inventory_oob_access_method_foreign_key ON host_inventory USING btree (oob_access_method);
+
+
+--
 -- Name: group_vars_groupname_foreign; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -446,6 +563,14 @@ ALTER TABLE ONLY host_inventory
 
 ALTER TABLE ONLY host_inventory
     ADD CONSTRAINT host_inventory_foreign_ipaddrs FOREIGN KEY (ipaddr) REFERENCES ipaddrs(ipaddr);
+
+
+--
+-- Name: host_inventory_oob_access_method_foreign_key; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY host_inventory
+    ADD CONSTRAINT host_inventory_oob_access_method_foreign_key FOREIGN KEY (oob_access_method) REFERENCES oob_access_methods(oob_access_method);
 
 
 --
