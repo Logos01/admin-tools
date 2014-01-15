@@ -125,8 +125,17 @@ def insert_host(options, cur, existing_values):
         )
     if not existing_values['grouping']:
         cur.execute(
-            "INSERT INTO host_groups (hostname,groupname) VALUES ('%s','%s');" %
-            (options.host, options.group)
+            """INSERT INTO host_groups (
+                 hostname,
+                 groupname
+               ) VALUES (
+                 '%s',
+                 '%s'
+               );""" %
+            (
+                options.host,
+                options.group
+            )
         )
     if not existing_values['host'] and not existing_values['ipaddr']:
         cur.execute(
