@@ -443,28 +443,6 @@ ALTER SEQUENCE oob_access_methods_primary_key_seq OWNED BY oob_access_methods.pr
 
 
 --
--- TOC entry 179 (class 1259 OID 26204)
--- Dependencies: 1823 6
--- Name: vmware_list; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
---
-
-CREATE TABLE vmware_list (
-    hostname character varying(50),
-    ipaddr cidr,
-    dns_name character varying(50),
-    os character varying(20),
-    os_version character varying(20),
-    arch character varying(10),
-    is_up boolean,
-    host character varying(50),
-    notes character varying(100),
-    row_is_obsolete boolean DEFAULT false
-);
-
-
-ALTER TABLE public.vmware_list OWNER TO logos;
-
---
 -- TOC entry 1822 (class 2604 OID 26187)
 -- Dependencies: 178 177 178
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
@@ -987,18 +965,6 @@ REVOKE ALL ON TABLE oob_access_methods FROM PUBLIC;
 REVOKE ALL ON TABLE oob_access_methods FROM logos;
 GRANT ALL ON TABLE oob_access_methods TO logos;
 GRANT SELECT ON TABLE oob_access_methods TO oracle;
-
-
---
--- TOC entry 2001 (class 0 OID 0)
--- Dependencies: 179
--- Name: vmware_list; Type: ACL; Schema: public; Owner: logos
---
-
-REVOKE ALL ON TABLE vmware_list FROM PUBLIC;
-REVOKE ALL ON TABLE vmware_list FROM logos;
-GRANT ALL ON TABLE vmware_list TO logos;
-GRANT SELECT ON TABLE vmware_list TO oracle;
 
 
 --
