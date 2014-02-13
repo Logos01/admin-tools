@@ -141,6 +141,7 @@ def options_host(options, host_inventory, ansible_items):
     for host_details in host_inventory:
         if options.host == host_details[0] and not host_details[2]:
             vars['ansible_ssh_host'] = host_details[1].replace('/32', '')
+            vars['online'] = host_details[3]
 
     if options.human:
         print 'Host: %s' % (options.host, )
