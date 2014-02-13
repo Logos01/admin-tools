@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.1.11
 -- Dumped by pg_dump version 9.1.11
--- Started on 2014-02-05 13:56:25 MST
+-- Started on 2014-02-13 15:51:33 MST
 
 SET statement_timeout = 0;
 SET client_encoding = 'SQL_ASCII';
@@ -13,7 +13,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- TOC entry 1978 (class 1262 OID 16386)
+-- TOC entry 1983 (class 1262 OID 16386)
 -- Name: inventory; Type: DATABASE; Schema: -; Owner: logos
 --
 
@@ -31,7 +31,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- TOC entry 181 (class 3079 OID 11645)
+-- TOC entry 182 (class 3079 OID 11645)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
@@ -39,8 +39,8 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 1981 (class 0 OID 0)
--- Dependencies: 181
+-- TOC entry 1986 (class 0 OID 0)
+-- Dependencies: 182
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
@@ -85,7 +85,7 @@ CREATE SEQUENCE architectures_primary_key_seq
 ALTER TABLE public.architectures_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1983 (class 0 OID 0)
+-- TOC entry 1988 (class 0 OID 0)
 -- Dependencies: 177
 -- Name: architectures_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -128,7 +128,7 @@ CREATE SEQUENCE group_vars_primary_key_seq
 ALTER TABLE public.group_vars_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1985 (class 0 OID 0)
+-- TOC entry 1990 (class 0 OID 0)
 -- Dependencies: 165
 -- Name: group_vars_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -138,7 +138,7 @@ ALTER SEQUENCE group_vars_primary_key_seq OWNED BY group_vars.primary_key;
 
 --
 -- TOC entry 162 (class 1259 OID 16405)
--- Dependencies: 1814 6
+-- Dependencies: 1816 6
 -- Name: groups; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -169,7 +169,7 @@ CREATE SEQUENCE groups_primary_key_seq
 ALTER TABLE public.groups_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1987 (class 0 OID 0)
+-- TOC entry 1992 (class 0 OID 0)
 -- Dependencies: 166
 -- Name: groups_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -198,7 +198,7 @@ SET default_with_oids = true;
 
 --
 -- TOC entry 161 (class 1259 OID 16387)
--- Dependencies: 1812 6
+-- Dependencies: 1814 6
 -- Name: host_inventory; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -236,21 +236,38 @@ CREATE TABLE network_segments (
 
 ALTER TABLE public.network_segments OWNER TO logos;
 
+SET default_with_oids = false;
+
 --
--- TOC entry 180 (class 1259 OID 35048)
--- Dependencies: 1973 6
+-- TOC entry 180 (class 1259 OID 35059)
+-- Dependencies: 6
+-- Name: server_serials; Type: TABLE; Schema: public; Owner: logos; Tablespace: 
+--
+
+CREATE TABLE server_serials (
+    hostname character varying(20),
+    serial_tag character varying,
+    primary_key integer NOT NULL
+);
+
+
+ALTER TABLE public.server_serials OWNER TO logos;
+
+--
+-- TOC entry 181 (class 1259 OID 35076)
+-- Dependencies: 1978 6
 -- Name: host_details; Type: VIEW; Schema: public; Owner: logos
 --
 
 CREATE VIEW host_details AS
-    SELECT host_inventory.hostname, host_inventory.ipaddr, network_segments.segment_description, host_groups.groupname, host_inventory.access_method, host_inventory.online, host_inventory.description, host_inventory.row_is_obsolete, host_inventory.in_dns, host_inventory.os, host_inventory.os_version, host_inventory.arch, host_inventory.oob_access_method, host_inventory.oob_access_address FROM ((host_inventory LEFT JOIN network_segments ON (((network_segments.inet_segment)::inet >> (host_inventory.ipaddr)::inet))) LEFT JOIN host_groups ON (((host_groups.hostname)::text = (host_inventory.hostname)::text)));
+    SELECT host_inventory.hostname, host_inventory.ipaddr, network_segments.segment_description, host_groups.groupname, host_inventory.access_method, host_inventory.online, host_inventory.description, host_inventory.row_is_obsolete, host_inventory.in_dns, host_inventory.os, host_inventory.os_version, host_inventory.arch, server_serials.serial_tag, host_inventory.oob_access_method, host_inventory.oob_access_address FROM (((host_inventory LEFT JOIN network_segments ON (((network_segments.inet_segment)::inet >> (host_inventory.ipaddr)::inet))) LEFT JOIN host_groups ON (((host_groups.hostname)::text = (host_inventory.hostname)::text))) LEFT JOIN server_serials ON (((host_inventory.hostname)::text = (server_serials.hostname)::text)));
 
 
 ALTER TABLE public.host_details OWNER TO logos;
 
 --
 -- TOC entry 172 (class 1259 OID 16602)
--- Dependencies: 163 6
+-- Dependencies: 6 163
 -- Name: host_groups_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
 --
 
@@ -265,7 +282,7 @@ CREATE SEQUENCE host_groups_primary_key_seq
 ALTER TABLE public.host_groups_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1992 (class 0 OID 0)
+-- TOC entry 1998 (class 0 OID 0)
 -- Dependencies: 172
 -- Name: host_groups_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -290,15 +307,13 @@ CREATE SEQUENCE host_inventory_primary_key_seq
 ALTER TABLE public.host_inventory_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1993 (class 0 OID 0)
+-- TOC entry 1999 (class 0 OID 0)
 -- Dependencies: 171
 -- Name: host_inventory_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
 
 ALTER SEQUENCE host_inventory_primary_key_seq OWNED BY host_inventory.primary_key;
 
-
-SET default_with_oids = false;
 
 --
 -- TOC entry 170 (class 1259 OID 16473)
@@ -331,7 +346,7 @@ CREATE SEQUENCE hostnames_primary_key_seq
 ALTER TABLE public.hostnames_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1995 (class 0 OID 0)
+-- TOC entry 2001 (class 0 OID 0)
 -- Dependencies: 169
 -- Name: hostnames_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -355,7 +370,7 @@ ALTER TABLE public.ipaddrs OWNER TO logos;
 
 --
 -- TOC entry 167 (class 1259 OID 16458)
--- Dependencies: 168 6
+-- Dependencies: 6 168
 -- Name: ipaddrs_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
 --
 
@@ -370,7 +385,7 @@ CREATE SEQUENCE ipaddrs_primary_key_seq
 ALTER TABLE public.ipaddrs_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1997 (class 0 OID 0)
+-- TOC entry 2003 (class 0 OID 0)
 -- Dependencies: 167
 -- Name: ipaddrs_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -380,7 +395,7 @@ ALTER SEQUENCE ipaddrs_primary_key_seq OWNED BY ipaddrs.primary_key;
 
 --
 -- TOC entry 175 (class 1259 OID 25172)
--- Dependencies: 6 176
+-- Dependencies: 176 6
 -- Name: network_segments_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
 --
 
@@ -395,7 +410,7 @@ CREATE SEQUENCE network_segments_primary_key_seq
 ALTER TABLE public.network_segments_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 1998 (class 0 OID 0)
+-- TOC entry 2004 (class 0 OID 0)
 -- Dependencies: 175
 -- Name: network_segments_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -419,7 +434,7 @@ ALTER TABLE public.oob_access_methods OWNER TO logos;
 
 --
 -- TOC entry 173 (class 1259 OID 25155)
--- Dependencies: 174 6
+-- Dependencies: 6 174
 -- Name: oob_access_methods_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
 --
 
@@ -434,7 +449,7 @@ CREATE SEQUENCE oob_access_methods_primary_key_seq
 ALTER TABLE public.oob_access_methods_primary_key_seq OWNER TO logos;
 
 --
--- TOC entry 2000 (class 0 OID 0)
+-- TOC entry 2006 (class 0 OID 0)
 -- Dependencies: 173
 -- Name: oob_access_methods_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
 --
@@ -443,7 +458,32 @@ ALTER SEQUENCE oob_access_methods_primary_key_seq OWNED BY oob_access_methods.pr
 
 
 --
--- TOC entry 1822 (class 2604 OID 26187)
+-- TOC entry 179 (class 1259 OID 35057)
+-- Dependencies: 6 180
+-- Name: server_serials_primary_key_seq; Type: SEQUENCE; Schema: public; Owner: logos
+--
+
+CREATE SEQUENCE server_serials_primary_key_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.server_serials_primary_key_seq OWNER TO logos;
+
+--
+-- TOC entry 2007 (class 0 OID 0)
+-- Dependencies: 179
+-- Name: server_serials_primary_key_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: logos
+--
+
+ALTER SEQUENCE server_serials_primary_key_seq OWNED BY server_serials.primary_key;
+
+
+--
+-- TOC entry 1824 (class 2604 OID 26187)
 -- Dependencies: 178 177 178
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -452,7 +492,7 @@ ALTER TABLE ONLY architectures ALTER COLUMN primary_key SET DEFAULT nextval('arc
 
 
 --
--- TOC entry 1817 (class 2604 OID 16430)
+-- TOC entry 1819 (class 2604 OID 16430)
 -- Dependencies: 165 164
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -461,7 +501,7 @@ ALTER TABLE ONLY group_vars ALTER COLUMN primary_key SET DEFAULT nextval('group_
 
 
 --
--- TOC entry 1815 (class 2604 OID 16438)
+-- TOC entry 1817 (class 2604 OID 16438)
 -- Dependencies: 166 162
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -470,7 +510,7 @@ ALTER TABLE ONLY groups ALTER COLUMN primary_key SET DEFAULT nextval('groups_pri
 
 
 --
--- TOC entry 1816 (class 2604 OID 16604)
+-- TOC entry 1818 (class 2604 OID 16604)
 -- Dependencies: 172 163
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -479,7 +519,7 @@ ALTER TABLE ONLY host_groups ALTER COLUMN primary_key SET DEFAULT nextval('host_
 
 
 --
--- TOC entry 1813 (class 2604 OID 16514)
+-- TOC entry 1815 (class 2604 OID 16514)
 -- Dependencies: 171 161
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -488,7 +528,7 @@ ALTER TABLE ONLY host_inventory ALTER COLUMN primary_key SET DEFAULT nextval('ho
 
 
 --
--- TOC entry 1819 (class 2604 OID 16476)
+-- TOC entry 1821 (class 2604 OID 16476)
 -- Dependencies: 169 170 170
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -497,7 +537,7 @@ ALTER TABLE ONLY hostnames ALTER COLUMN primary_key SET DEFAULT nextval('hostnam
 
 
 --
--- TOC entry 1818 (class 2604 OID 16463)
+-- TOC entry 1820 (class 2604 OID 16463)
 -- Dependencies: 168 167 168
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
@@ -506,8 +546,8 @@ ALTER TABLE ONLY ipaddrs ALTER COLUMN primary_key SET DEFAULT nextval('ipaddrs_p
 
 
 --
--- TOC entry 1821 (class 2604 OID 25177)
--- Dependencies: 175 176 176
+-- TOC entry 1823 (class 2604 OID 25177)
+-- Dependencies: 176 175 176
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
 
@@ -515,8 +555,8 @@ ALTER TABLE ONLY network_segments ALTER COLUMN primary_key SET DEFAULT nextval('
 
 
 --
--- TOC entry 1820 (class 2604 OID 25160)
--- Dependencies: 173 174 174
+-- TOC entry 1822 (class 2604 OID 25160)
+-- Dependencies: 174 173 174
 -- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
 --
 
@@ -524,8 +564,17 @@ ALTER TABLE ONLY oob_access_methods ALTER COLUMN primary_key SET DEFAULT nextval
 
 
 --
--- TOC entry 1850 (class 2606 OID 16478)
--- Dependencies: 170 170 1975
+-- TOC entry 1825 (class 2604 OID 35062)
+-- Dependencies: 179 180 180
+-- Name: primary_key; Type: DEFAULT; Schema: public; Owner: logos
+--
+
+ALTER TABLE ONLY server_serials ALTER COLUMN primary_key SET DEFAULT nextval('server_serials_primary_key_seq'::regclass);
+
+
+--
+-- TOC entry 1852 (class 2606 OID 16478)
+-- Dependencies: 170 170 1980
 -- Name: PrimaryKey_hostname; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -534,8 +583,8 @@ ALTER TABLE ONLY hostnames
 
 
 --
--- TOC entry 1846 (class 2606 OID 16468)
--- Dependencies: 168 168 1975
+-- TOC entry 1848 (class 2606 OID 16468)
+-- Dependencies: 168 168 1980
 -- Name: PrimaryKey_ipaddrs; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -544,8 +593,8 @@ ALTER TABLE ONLY ipaddrs
 
 
 --
--- TOC entry 1862 (class 2606 OID 26193)
--- Dependencies: 178 178 1975
+-- TOC entry 1864 (class 2606 OID 26193)
+-- Dependencies: 178 178 1980
 -- Name: architectures_arch_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -554,8 +603,8 @@ ALTER TABLE ONLY architectures
 
 
 --
--- TOC entry 1864 (class 2606 OID 26189)
--- Dependencies: 178 178 1975
+-- TOC entry 1866 (class 2606 OID 26189)
+-- Dependencies: 178 178 1980
 -- Name: architectures_pkey; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -564,8 +613,8 @@ ALTER TABLE ONLY architectures
 
 
 --
--- TOC entry 1839 (class 2606 OID 16612)
--- Dependencies: 163 163 1975
+-- TOC entry 1841 (class 2606 OID 16612)
+-- Dependencies: 163 163 1980
 -- Name: host_groups_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -574,8 +623,8 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- TOC entry 1841 (class 2606 OID 25153)
--- Dependencies: 163 163 163 1975
+-- TOC entry 1843 (class 2606 OID 25153)
+-- Dependencies: 163 163 163 1980
 -- Name: host_groups_unique_matching; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -584,8 +633,8 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- TOC entry 1830 (class 2606 OID 16525)
--- Dependencies: 161 161 1975
+-- TOC entry 1832 (class 2606 OID 16525)
+-- Dependencies: 161 161 1980
 -- Name: host_inventory_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -594,8 +643,8 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- TOC entry 1854 (class 2606 OID 25162)
--- Dependencies: 174 174 1975
+-- TOC entry 1856 (class 2606 OID 25162)
+-- Dependencies: 174 174 1980
 -- Name: oob_access_method_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -604,8 +653,8 @@ ALTER TABLE ONLY oob_access_methods
 
 
 --
--- TOC entry 1856 (class 2606 OID 25164)
--- Dependencies: 174 174 1975
+-- TOC entry 1858 (class 2606 OID 25164)
+-- Dependencies: 174 174 1980
 -- Name: oob_access_method_uniqueness; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -614,8 +663,8 @@ ALTER TABLE ONLY oob_access_methods
 
 
 --
--- TOC entry 1844 (class 2606 OID 16435)
--- Dependencies: 164 164 1975
+-- TOC entry 1846 (class 2606 OID 16435)
+-- Dependencies: 164 164 1980
 -- Name: primary_key_group_vars; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -624,8 +673,8 @@ ALTER TABLE ONLY group_vars
 
 
 --
--- TOC entry 1832 (class 2606 OID 16443)
--- Dependencies: 162 162 1975
+-- TOC entry 1834 (class 2606 OID 16443)
+-- Dependencies: 162 162 1980
 -- Name: primary_key_groups; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -634,8 +683,8 @@ ALTER TABLE ONLY groups
 
 
 --
--- TOC entry 1858 (class 2606 OID 25182)
--- Dependencies: 176 176 1975
+-- TOC entry 1860 (class 2606 OID 25182)
+-- Dependencies: 176 176 1980
 -- Name: segment_list_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -644,8 +693,8 @@ ALTER TABLE ONLY network_segments
 
 
 --
--- TOC entry 1860 (class 2606 OID 25184)
--- Dependencies: 176 176 1975
+-- TOC entry 1862 (class 2606 OID 25184)
+-- Dependencies: 176 176 1980
 -- Name: segment_list_unique_subnets; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -654,8 +703,18 @@ ALTER TABLE ONLY network_segments
 
 
 --
--- TOC entry 1834 (class 2606 OID 16445)
--- Dependencies: 162 162 1975
+-- TOC entry 1868 (class 2606 OID 35067)
+-- Dependencies: 180 180 1980
+-- Name: server_serials_primary_key; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
+--
+
+ALTER TABLE ONLY server_serials
+    ADD CONSTRAINT server_serials_primary_key PRIMARY KEY (primary_key);
+
+
+--
+-- TOC entry 1836 (class 2606 OID 16445)
+-- Dependencies: 162 162 1980
 -- Name: unique_group_names; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -664,8 +723,8 @@ ALTER TABLE ONLY groups
 
 
 --
--- TOC entry 1852 (class 2606 OID 16480)
--- Dependencies: 170 170 1975
+-- TOC entry 1854 (class 2606 OID 16480)
+-- Dependencies: 170 170 1980
 -- Name: unique_hostname; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -674,8 +733,8 @@ ALTER TABLE ONLY hostnames
 
 
 --
--- TOC entry 1848 (class 2606 OID 16470)
--- Dependencies: 168 168 1975
+-- TOC entry 1850 (class 2606 OID 16470)
+-- Dependencies: 168 168 1980
 -- Name: unique_ipaddrs; Type: CONSTRAINT; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -684,8 +743,8 @@ ALTER TABLE ONLY ipaddrs
 
 
 --
--- TOC entry 1824 (class 1259 OID 16499)
--- Dependencies: 161 1975
+-- TOC entry 1826 (class 1259 OID 16499)
+-- Dependencies: 161 1980
 -- Name: fki_Unique_ipaddrs; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -693,8 +752,8 @@ CREATE INDEX "fki_Unique_ipaddrs" ON host_inventory USING btree (ipaddr);
 
 
 --
--- TOC entry 1825 (class 1259 OID 26199)
--- Dependencies: 161 1975
+-- TOC entry 1827 (class 1259 OID 26199)
+-- Dependencies: 161 1980
 -- Name: fki_arch_foreign_key; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -702,8 +761,8 @@ CREATE INDEX fki_arch_foreign_key ON host_inventory USING btree (arch);
 
 
 --
--- TOC entry 1842 (class 1259 OID 16451)
--- Dependencies: 164 1975
+-- TOC entry 1844 (class 1259 OID 16451)
+-- Dependencies: 164 1980
 -- Name: fki_group_vars_groupname_foreign; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -711,8 +770,8 @@ CREATE INDEX fki_group_vars_groupname_foreign ON group_vars USING btree (groupna
 
 
 --
--- TOC entry 1835 (class 1259 OID 16493)
--- Dependencies: 163 1975
+-- TOC entry 1837 (class 1259 OID 16493)
+-- Dependencies: 163 1980
 -- Name: fki_host_groups_foreign_groupnames; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -720,8 +779,8 @@ CREATE INDEX fki_host_groups_foreign_groupnames ON host_groups USING btree (grou
 
 
 --
--- TOC entry 1836 (class 1259 OID 16487)
--- Dependencies: 163 1975
+-- TOC entry 1838 (class 1259 OID 16487)
+-- Dependencies: 163 1980
 -- Name: fki_host_groups_foreign_hostnames; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -729,8 +788,8 @@ CREATE INDEX fki_host_groups_foreign_hostnames ON host_groups USING btree (hostn
 
 
 --
--- TOC entry 1837 (class 1259 OID 16457)
--- Dependencies: 163 1975
+-- TOC entry 1839 (class 1259 OID 16457)
+-- Dependencies: 163 1980
 -- Name: fki_host_groups_inventory_foreign; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -738,8 +797,8 @@ CREATE INDEX fki_host_groups_inventory_foreign ON host_groups USING btree (hostn
 
 
 --
--- TOC entry 1826 (class 1259 OID 16511)
--- Dependencies: 161 1975
+-- TOC entry 1828 (class 1259 OID 16511)
+-- Dependencies: 161 1980
 -- Name: fki_host_inventory_foreign_hostnames; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -747,8 +806,8 @@ CREATE INDEX fki_host_inventory_foreign_hostnames ON host_inventory USING btree 
 
 
 --
--- TOC entry 1827 (class 1259 OID 16505)
--- Dependencies: 161 1975
+-- TOC entry 1829 (class 1259 OID 16505)
+-- Dependencies: 161 1980
 -- Name: fki_host_inventory_foreign_ipaddrs; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -756,8 +815,8 @@ CREATE INDEX fki_host_inventory_foreign_ipaddrs ON host_inventory USING btree (i
 
 
 --
--- TOC entry 1828 (class 1259 OID 25170)
--- Dependencies: 161 1975
+-- TOC entry 1830 (class 1259 OID 25170)
+-- Dependencies: 161 1980
 -- Name: fki_host_inventory_oob_access_method_foreign_key; Type: INDEX; Schema: public; Owner: logos; Tablespace: 
 --
 
@@ -765,8 +824,8 @@ CREATE INDEX fki_host_inventory_oob_access_method_foreign_key ON host_inventory 
 
 
 --
--- TOC entry 1868 (class 2606 OID 26194)
--- Dependencies: 178 161 1861 1975
+-- TOC entry 1872 (class 2606 OID 26194)
+-- Dependencies: 1863 161 178 1980
 -- Name: arch_foreign_key; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -775,8 +834,8 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- TOC entry 1871 (class 2606 OID 16446)
--- Dependencies: 1833 162 164 1975
+-- TOC entry 1875 (class 2606 OID 16446)
+-- Dependencies: 162 1835 164 1980
 -- Name: group_vars_groupname_foreign; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -785,8 +844,8 @@ ALTER TABLE ONLY group_vars
 
 
 --
--- TOC entry 1870 (class 2606 OID 16488)
--- Dependencies: 162 163 1833 1975
+-- TOC entry 1874 (class 2606 OID 16488)
+-- Dependencies: 1835 163 162 1980
 -- Name: host_groups_foreign_groupnames; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -795,8 +854,8 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- TOC entry 1869 (class 2606 OID 16482)
--- Dependencies: 1851 163 170 1975
+-- TOC entry 1873 (class 2606 OID 16482)
+-- Dependencies: 1853 163 170 1980
 -- Name: host_groups_foreign_hostnames; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -805,8 +864,8 @@ ALTER TABLE ONLY host_groups
 
 
 --
--- TOC entry 1866 (class 2606 OID 16506)
--- Dependencies: 170 161 1851 1975
+-- TOC entry 1870 (class 2606 OID 16506)
+-- Dependencies: 161 170 1853 1980
 -- Name: host_inventory_foreign_hostnames; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -815,8 +874,8 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- TOC entry 1865 (class 2606 OID 16500)
--- Dependencies: 168 161 1847 1975
+-- TOC entry 1869 (class 2606 OID 16500)
+-- Dependencies: 1849 161 168 1980
 -- Name: host_inventory_foreign_ipaddrs; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -825,8 +884,8 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- TOC entry 1867 (class 2606 OID 25165)
--- Dependencies: 174 161 1855 1975
+-- TOC entry 1871 (class 2606 OID 25165)
+-- Dependencies: 174 1857 161 1980
 -- Name: host_inventory_oob_access_method_foreign_key; Type: FK CONSTRAINT; Schema: public; Owner: logos
 --
 
@@ -835,7 +894,17 @@ ALTER TABLE ONLY host_inventory
 
 
 --
--- TOC entry 1980 (class 0 OID 0)
+-- TOC entry 1876 (class 2606 OID 35068)
+-- Dependencies: 170 1853 180 1980
+-- Name: server_serials_hostname_foreign_key; Type: FK CONSTRAINT; Schema: public; Owner: logos
+--
+
+ALTER TABLE ONLY server_serials
+    ADD CONSTRAINT server_serials_hostname_foreign_key FOREIGN KEY (hostname) REFERENCES hostnames(hostname);
+
+
+--
+-- TOC entry 1985 (class 0 OID 0)
 -- Dependencies: 6
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
@@ -848,7 +917,7 @@ GRANT USAGE ON SCHEMA public TO oracle;
 
 
 --
--- TOC entry 1982 (class 0 OID 0)
+-- TOC entry 1987 (class 0 OID 0)
 -- Dependencies: 178
 -- Name: architectures; Type: ACL; Schema: public; Owner: logos
 --
@@ -860,7 +929,7 @@ GRANT SELECT ON TABLE architectures TO oracle;
 
 
 --
--- TOC entry 1984 (class 0 OID 0)
+-- TOC entry 1989 (class 0 OID 0)
 -- Dependencies: 164
 -- Name: group_vars; Type: ACL; Schema: public; Owner: logos
 --
@@ -872,7 +941,7 @@ GRANT SELECT ON TABLE group_vars TO oracle;
 
 
 --
--- TOC entry 1986 (class 0 OID 0)
+-- TOC entry 1991 (class 0 OID 0)
 -- Dependencies: 162
 -- Name: groups; Type: ACL; Schema: public; Owner: logos
 --
@@ -884,7 +953,7 @@ GRANT SELECT ON TABLE groups TO oracle;
 
 
 --
--- TOC entry 1988 (class 0 OID 0)
+-- TOC entry 1993 (class 0 OID 0)
 -- Dependencies: 163
 -- Name: host_groups; Type: ACL; Schema: public; Owner: logos
 --
@@ -896,7 +965,7 @@ GRANT SELECT ON TABLE host_groups TO oracle;
 
 
 --
--- TOC entry 1989 (class 0 OID 0)
+-- TOC entry 1994 (class 0 OID 0)
 -- Dependencies: 161
 -- Name: host_inventory; Type: ACL; Schema: public; Owner: logos
 --
@@ -908,7 +977,7 @@ GRANT SELECT ON TABLE host_inventory TO oracle;
 
 
 --
--- TOC entry 1990 (class 0 OID 0)
+-- TOC entry 1995 (class 0 OID 0)
 -- Dependencies: 176
 -- Name: network_segments; Type: ACL; Schema: public; Owner: logos
 --
@@ -920,8 +989,20 @@ GRANT SELECT ON TABLE network_segments TO oracle;
 
 
 --
--- TOC entry 1991 (class 0 OID 0)
+-- TOC entry 1996 (class 0 OID 0)
 -- Dependencies: 180
+-- Name: server_serials; Type: ACL; Schema: public; Owner: logos
+--
+
+REVOKE ALL ON TABLE server_serials FROM PUBLIC;
+REVOKE ALL ON TABLE server_serials FROM logos;
+GRANT ALL ON TABLE server_serials TO logos;
+GRANT SELECT ON TABLE server_serials TO oracle;
+
+
+--
+-- TOC entry 1997 (class 0 OID 0)
+-- Dependencies: 181
 -- Name: host_details; Type: ACL; Schema: public; Owner: logos
 --
 
@@ -932,7 +1013,7 @@ GRANT SELECT ON TABLE host_details TO oracle;
 
 
 --
--- TOC entry 1994 (class 0 OID 0)
+-- TOC entry 2000 (class 0 OID 0)
 -- Dependencies: 170
 -- Name: hostnames; Type: ACL; Schema: public; Owner: logos
 --
@@ -944,7 +1025,7 @@ GRANT SELECT ON TABLE hostnames TO oracle;
 
 
 --
--- TOC entry 1996 (class 0 OID 0)
+-- TOC entry 2002 (class 0 OID 0)
 -- Dependencies: 168
 -- Name: ipaddrs; Type: ACL; Schema: public; Owner: logos
 --
@@ -956,7 +1037,7 @@ GRANT SELECT ON TABLE ipaddrs TO oracle;
 
 
 --
--- TOC entry 1999 (class 0 OID 0)
+-- TOC entry 2005 (class 0 OID 0)
 -- Dependencies: 174
 -- Name: oob_access_methods; Type: ACL; Schema: public; Owner: logos
 --
@@ -968,8 +1049,8 @@ GRANT SELECT ON TABLE oob_access_methods TO oracle;
 
 
 --
--- TOC entry 1476 (class 826 OID 35039)
--- Dependencies: 6 1975
+-- TOC entry 1478 (class 826 OID 35039)
+-- Dependencies: 6 1980
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: public; Owner: logos
 --
 
@@ -978,7 +1059,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE logos IN SCHEMA public REVOKE ALL ON TABLES  F
 ALTER DEFAULT PRIVILEGES FOR ROLE logos IN SCHEMA public GRANT SELECT ON TABLES  TO oracle;
 
 
--- Completed on 2014-02-05 13:56:26 MST
+-- Completed on 2014-02-13 15:51:33 MST
 
 --
 -- PostgreSQL database dump complete
