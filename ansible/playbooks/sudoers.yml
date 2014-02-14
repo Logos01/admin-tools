@@ -1,0 +1,32 @@
+- hosts: managed
+
+  tasks:
+
+    # Create /etc/sudoers.d
+    - name: Ensure /etc/sudoers.d exists
+      action: file path=/etc/sudoers.d owner=root group=root mode=0770 state=directory
+
+    # Create /var/backups
+    - name: Ensure /var/backups exists
+      action: file path=/var/backups owner=root group=root mode=0755 state=directory
+
+    # Preserve old sudoers file
+    - name: Preserve original sudoers file
+      action: command /bin/cp /etc/sudoers /var/backups/sudoers.last
+      action: command touch /var/backups/{{item}}
+      action: raw ( grep -H '' /etc/sudoers ; grep -rH '' /etc/sudoers.d/ ; /bin/true ) >> /var/backups/{{item}}
+      with_items:
+        - sudoers.{{ansible_date_time.iso8601}}
+
+    # Copy sudoers files for iconrad to host
+    - name: deploy /etc/sudoers.d/ files
+      action: copy src=/opt/repo/local/sudoers.d/{{item}} dest=/etc/sudoers.d/{{item}} mode=0440 owner=root group=root
+      with_items:
+        - 000_sysadmins
+        - 500_cmdb_users
+        - 999_db_admins
+
+    
+    # Ensure include statement is present in /etc/sudoers
+    - name: Ensure include statement is present in /etc/sudoers
+      action: script ../ansbin/sudoers_include.sh
