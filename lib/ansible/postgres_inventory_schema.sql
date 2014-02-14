@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.1.11
 -- Dumped by pg_dump version 9.1.11
--- Started on 2014-02-13 15:51:33 MST
+-- Started on 2014-02-14 16:29:55 MST
 
 SET statement_timeout = 0;
 SET client_encoding = 'SQL_ASCII';
@@ -254,13 +254,13 @@ CREATE TABLE server_serials (
 ALTER TABLE public.server_serials OWNER TO logos;
 
 --
--- TOC entry 181 (class 1259 OID 35076)
+-- TOC entry 181 (class 1259 OID 43311)
 -- Dependencies: 1978 6
 -- Name: host_details; Type: VIEW; Schema: public; Owner: logos
 --
 
 CREATE VIEW host_details AS
-    SELECT host_inventory.hostname, host_inventory.ipaddr, network_segments.segment_description, host_groups.groupname, host_inventory.access_method, host_inventory.online, host_inventory.description, host_inventory.row_is_obsolete, host_inventory.in_dns, host_inventory.os, host_inventory.os_version, host_inventory.arch, server_serials.serial_tag, host_inventory.oob_access_method, host_inventory.oob_access_address FROM (((host_inventory LEFT JOIN network_segments ON (((network_segments.inet_segment)::inet >> (host_inventory.ipaddr)::inet))) LEFT JOIN host_groups ON (((host_groups.hostname)::text = (host_inventory.hostname)::text))) LEFT JOIN server_serials ON (((host_inventory.hostname)::text = (server_serials.hostname)::text)));
+    SELECT host_inventory.hostname, host_inventory.ipaddr, network_segments.segment_description, string_agg((host_groups.groupname)::text, ','::text) AS groupname, host_inventory.access_method, host_inventory.online, host_inventory.description, host_inventory.row_is_obsolete, host_inventory.in_dns, host_inventory.os, host_inventory.os_version, host_inventory.arch, server_serials.serial_tag, host_inventory.oob_access_method, host_inventory.oob_access_address FROM (((host_inventory LEFT JOIN network_segments ON (((network_segments.inet_segment)::inet >> (host_inventory.ipaddr)::inet))) LEFT JOIN host_groups ON (((host_groups.hostname)::text = (host_inventory.hostname)::text))) LEFT JOIN server_serials ON (((host_inventory.hostname)::text = (server_serials.hostname)::text))) GROUP BY host_inventory.hostname, host_inventory.ipaddr, network_segments.segment_description, host_inventory.access_method, host_inventory.online, host_inventory.description, host_inventory.row_is_obsolete, host_inventory.in_dns, host_inventory.os, host_inventory.os_version, host_inventory.arch, server_serials.serial_tag, host_inventory.oob_access_method, host_inventory.oob_access_address;
 
 
 ALTER TABLE public.host_details OWNER TO logos;
@@ -1059,7 +1059,7 @@ ALTER DEFAULT PRIVILEGES FOR ROLE logos IN SCHEMA public REVOKE ALL ON TABLES  F
 ALTER DEFAULT PRIVILEGES FOR ROLE logos IN SCHEMA public GRANT SELECT ON TABLES  TO oracle;
 
 
--- Completed on 2014-02-13 15:51:33 MST
+-- Completed on 2014-02-14 16:29:55 MST
 
 --
 -- PostgreSQL database dump complete
