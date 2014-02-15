@@ -11,7 +11,7 @@
     - name: Check DNS
       sudo: no
       delegate_to: localhost
-      action: shell dig +short "{{ ansible_hostname |lower }}".shc.org
+      action: shell dig +short "{{ ansible_hostname |lower }}".company.tld
       register: in_dns
 
     - name: Set in_dns in inventory to True
