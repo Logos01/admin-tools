@@ -1,0 +1,27 @@
+- hosts: "{{ hosts }}"
+
+  tasks:
+
+    - name: Set os to discovered value
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE host_inventory SET os='{{ansible_distribution}}' WHERE hostname = '{{ inventory_hostname }}';"
+      when: ansible_distribution is defined and ansible_lsb is not defined
+
+    - name: Set os_version to discovered value
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE host_inventory SET os_version='{{ansible_distribution_version}}' WHERE hostname = '{{ inventory_hostname }}';"
+      when: ansible_distribution_version is defined and ansible_lsb is not defined
+
+    - name: Set os to discovered lsb value
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE host_inventory SET os='{{ ansible_lsb.id }}' WHERE hostname = '{{ inventory_hostname }}';"
+      when: ansible_lsb.id is defined
+
+    - name: Set os_version to discovered lsb value
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE host_inventory SET os_version='{{ ansible_lsb.release }}' WHERE hostname = '{{ inventory_hostname }}';"
+      when: ansible_lsb.release is defined

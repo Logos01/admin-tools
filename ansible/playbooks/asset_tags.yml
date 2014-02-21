@@ -9,7 +9,7 @@
       action: shell psql inventory -c "INSERT INTO server_serials (SELECT hostnames.hostname FROM hostnames WHERE NOT EXISTS ( SELECT server_serials.hostname FROM server_serials WHERE hostnames.hostname = server_serials.hostname));"
       ignore_errors: true
 
-- hosts: managed
+- hosts: "{{ hosts }}"
 
   gather_facts: true
 
@@ -17,21 +17,22 @@
 
     - name: Obtain product serial on HP-UX systems.
       sudo: yes
-      action: shell getconf MACHINE_SERIAL || echo "selclass qualifier system;info;wait;infolog" | /usr/sbin/cstm | grep "System serial" || echo 'NA'
+      action: shell getconf MACHINE_SERIAL || echo "selclass qualifier system;info;wait;infolog" | /usr/sbin/cstm | grep "System serial"
       when: ansible_product_serial is not defined
       register: hp_serial
       ignore_errors: true
 
-    - name: Update database with serial_tag information
+
+    - name: Update database with serial_tag information (HP-UX)
       sudo: no
       delegate_to: localhost
-      action: shell psql inventory -c "UPDATE server_serials SET serial_tag='{{ ansible_product_serial }}' WHERE hostname='{{ ansible_hostname|lower }}';"
-      when: ansible_product_serial is defined
+      action: shell psql inventory -c "UPDATE server_serials SET serial_tag='{{hp_serial.stdout}}' WHERE hostname='{{ inventory_hostname }}';"
+      when: hp_serial.stdout is defined
       ignore_errors: true
 
     - name: Update database with serial_tag information
       sudo: no
       delegate_to: localhost
-      action: shell psql inventory -c "UPDATE server_serials SET serial_tag='{{hp_serial.stdout}}' WHERE hostname='{{ ansible_hostname|lower }}';"
-      when: hp_serial.stdout is defined
+      action: shell psql inventory -c "UPDATE server_serials SET serial_tag='{{ ansible_product_serial }}' WHERE hostname='{{ inventory_hostname }}';"
+      when: ansible_product_serial is defined
       ignore_errors: true

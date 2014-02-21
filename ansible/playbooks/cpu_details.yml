@@ -1,0 +1,38 @@
+- hosts: localhost
+
+  gather_facts: false
+  
+  tasks: 
+
+    - name: Ensure necessary hostname entries exist in server_cpu_info table
+      sudo: no
+      action: shell psql inventory -c "INSERT INTO server_cpu_info (hostname) ((SELECT hostnames.hostname FROM hostnames WHERE NOT EXISTS ( SELECT server_cpu_info.hostname FROM server_cpu_info WHERE hostnames.hostname = server_cpu_info.hostname)));"
+      ignore_errors: true
+
+- hosts: "{{ hosts }}"
+
+  gather_facts: true
+
+  tasks:
+
+    - name: Update database with cpu_type information
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE server_cpu_info SET cpu_type='{{ ansible_processor[0] }}' WHERE hostname='{{ inventory_hostname }}';"
+      when: ansible_processor is defined
+      ignore_errors: true
+
+
+    - name: Update database with cpu_count information
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE server_cpu_info SET cpu_cores='{{ ansible_processor_cores }}',cpu_count='{{ansible_processor_count}}',cpu_threads_per_core='{{ ansible_processor_threads_per_core }}',cpu_vcpus='{{ ansible_processor_vcpus }}' WHERE hostname='{{ inventory_hostname }}';"
+      when: ansible_processor_vcpus is defined
+      ignore_errors: true
+
+    - name: Update database with cpu_count only information (for HP-UX)
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE server_cpu_info SET cpu_count='{{ansible_processor_count}}' WHERE hostname='{{inventory_hostname}}';"
+      when: ansible_processor_count is defined and ansible_processor_vcpus is not defined
+      ignore_errors: true

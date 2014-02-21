@@ -1,4 +1,4 @@
-- hosts: managed
+- hosts: "{{ hosts }}"
 
   gather_facts: false
 
@@ -17,11 +17,11 @@
     - name: Set in_dns in inventory to True
       sudo: no
       delegate_to: localhost
-      action: shell psql inventory -c "UPDATE host_inventory SET in_dns=True WHERE hostname = '{{ ansible_hostname |lower }}';"
+      action: shell psql inventory -c "UPDATE host_inventory SET in_dns=True WHERE hostname = '{{ inventory_hostname }}';"
       when: in_dns.stdout
 
     - name: Set in_dns in inventory to False
       sudo: no
       delegate_to: localhost
-      action: shell psql inventory -c "UPDATE host_inventory SET in_dns=False WHERE hostname = '{{ ansible_hostname |lower }}';"
+      action: shell psql inventory -c "UPDATE host_inventory SET in_dns=False WHERE hostname = '{{ inventory_hostname }}';"
       when: not in_dns.stdout
