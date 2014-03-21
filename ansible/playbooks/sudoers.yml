@@ -1,4 +1,5 @@
-- hosts: managed
+- hosts: "{{ hosts }}"
+  sudo: yes
 
   tasks:
 
@@ -23,10 +24,19 @@
       action: copy src=/opt/repo/local/sudoers.d/{{item}} dest=/etc/sudoers.d/{{item}} mode=0440 owner=root group=root
       with_items:
         - 000_sysadmins
-        - 500_cmdb_users
-        - 999_db_admins
+        - 500_deberhart
+        - 999_iconrad
 
     
     # Ensure include statement is present in /etc/sudoers
-    - name: Ensure include statement is present in /etc/sudoers
-      action: script ../ansbin/sudoers_include.sh
+    - name: establish or confirm '#include /etc/sudoers.d' line
+      lineinfile: backup=yes state=present dest=/etc/sudoers
+                  regexp='^#includedir /etc/sudoers.d' backrefs=yes
+                  line='#includedir /etc/sudoers.d'
+
+    - name: establish or confirm '%wheel ALL=(ALL)  ALL' line
+      lineinfile: backup=yes state=present dest=/etc/sudoers
+                  regexp='^# %wheel[\s+]ALL=\(ALL\)[\s+]ALL' backrefs=yes
+                  line='%wheel ALL=(ALL)    ALL'
+
+
