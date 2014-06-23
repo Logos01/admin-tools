@@ -1,0 +1,21 @@
+- hosts: "{{ hosts }}"
+
+  tasks:
+
+    - name: Update existing values in server_disk_allocations table
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "UPDATE server_disk_allocations SET disk_size='{{ ansible_devices[item].size }}' WHERE hostname='{{inventory_hostname}}' AND disk_name='{{item}}';"
+      with_items:
+          - "{{ ansible_devices.keys() }}"
+      when: ansible_devices is defined
+      ignore_errors: True
+
+    - name: Insert new values in server_disk_allocations table
+      sudo: no
+      delegate_to: localhost
+      action: shell psql inventory -c "INSERT INTO server_disk_allocations (hostname,disk_name,disk_size) SELECT '{{inventory_hostname}}','{{item}}','{{ansible_devices[item].size}}' WHERE NOT EXISTS ( SELECT disk_name FROM server_disk_allocations WHERE hostname='{{inventory_hostname}}' AND disk_name='{{item}}' );"
+      with_items:
+          - "{{ ansible_devices.keys() }}"
+      ignore_errors: True
+      when: ansible_devices is defined
