@@ -1,25 +1,60 @@
 - hosts: "{{hosts}}"
   vars:
     users: {
-      firstuser: { 
-        password: 'VALID_HASH',
-        group: 'desktopusers'
+      qualys: { 
+        password: 'VALID_HASH'
+        group: 'qualys'
         },
-      seconduser: {
-        password: 'VALID_HASH',
+      sysadmin_guy: {
+        password: 'VALID_HASH'
         group: 'sysadmins'
         },
-      thirduser: {
-        password: 'VALID_HASH',
+      sysadmin_gal: {
+        password: 'VALID_HASH'
+        group: 'sysadmins'
+        }
+      }
+    vendorusers: {
+      vendorsupport: {
+        password: 'VALID_HASH'
         group: 'wheel'
         }
       }
+    orausers: {
+      oracle: {
+        password: 'VALID_HASH'
+        group: 'oracle'
+      }
+    }
 
 
   tasks:
 
+    - name: Ensure necessary groups exist
+      sudo: yes
+      action: group name="{{item}}" state=present
+      with_items:
+        - 'qualys'
+        - 'wheel'
+        - 'sysadmins'
+        - 'oracle'
     #
     - name: Create Users
       sudo: yes
       action: user password="{{ users[item]['password'] }}" name="{{ item }}" group="{{ users[item]['group'] }}"
+      #" <-- syntax highlight correction.
       with_items: "{{ users.keys() }}"
+
+    - name: Create Vendor Users
+      sudo: yes
+      action: user password="{{ mckusers[item]['password'] }}" name="{{item}}" group="{{ mckusers[item]['group'] }}"
+      #" <-- syntax highlight correction.
+      with_items: "{{ vendorusers.keys() }}"
+      when: add_vendorusers is defined
+
+    - name: Create Oracle Users
+      sudo: yes
+      action: user password="{{ orausers[item]['password'] }}" name="{{item}}" group="{{ orausers[item]['group'] }}"
+      #" <-- syntax highlight correction.
+      with_items: "{{ orausers.keys() }}"
+      when: add_orausers is defined
