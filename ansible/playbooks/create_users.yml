@@ -1,0 +1,25 @@
+- hosts: "{{hosts}}"
+  vars:
+    users: {
+      firstuser: { 
+        password: 'VALID_HASH',
+        group: 'desktopusers'
+        },
+      seconduser: {
+        password: 'VALID_HASH',
+        group: 'sysadmins'
+        },
+      thirduser: {
+        password: 'VALID_HASH',
+        group: 'wheel'
+        }
+      }
+
+
+  tasks:
+
+    #
+    - name: Create Users
+      sudo: yes
+      action: user password="{{ users[item]['password'] }}" name="{{ item }}" group="{{ users[item]['group'] }}"
+      with_items: "{{ users.keys() }}"
