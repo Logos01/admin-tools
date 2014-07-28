@@ -9,15 +9,13 @@ from optparse import OptionParser
 def establish_connection():
     global conn
     dbname = 'inventory'
-    username = 'user'
+    username = 'logos'
     hostname = '127.0.0.1'
-    password = 'password'
-    connection = "dbname='%s' user='%s' host='%s' password='%s'"
+    connection = "dbname='%s' user='%s' host='%s'"
     connection = connection % (
         dbname,
         username,
         hostname,
-        password,
     )
     try:
         conn = psycopg2.connect(connection)
@@ -120,13 +118,24 @@ def parse_options():
     return parser
 
 
-def options_list(options, ansible_items):
+def options_list(options, ansible_items, host_inventory):
     if options.human:
         for key in ansible_items.keys():
             print '[%s]\n%s\n' % \
                 (key, '\n'.join(ansible_items[key]['hosts']))
     else:
-        print json.dumps(ansible_items)
+        json_dict = {}
+        _meta = {}
+        _meta['hostvars'] = {}
+        for host_details in host_inventory:
+            hostvars = {}
+            hostvars['ansible_ssh_host'] = host_details[1].replace('/32', '')
+            hostvars['online'] = host_details[3]
+            _meta['hostvars'][host_details[0]] = hostvars
+        for item in ansible_items:
+            json_dict[item] = ansible_items[item]
+        json_dict['_meta'] = _meta
+        print json.dumps(json_dict)
 
 
 def options_host(options, host_inventory, ansible_items):
@@ -139,7 +148,8 @@ def options_host(options, host_inventory, ansible_items):
             vars['Null'] = 'Null'
 
     for host_details in host_inventory:
-        if options.host == host_details[0] and not host_details[2]:
+        if options.host == host_details[0]:
+#        if options.host == host_details[0] and not host_details[2]:
             vars['ansible_ssh_host'] = host_details[1].replace('/32', '')
             vars['online'] = host_details[3]
 
@@ -170,7 +180,7 @@ def main():
     )
 
     if options.list:
-        options_list(options, ansible_items)
+        options_list(options, ansible_items, host_inventory)
 
     elif options.host:
         options_host(options, host_inventory, ansible_items)
