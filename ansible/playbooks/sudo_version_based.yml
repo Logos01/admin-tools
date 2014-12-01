@@ -83,7 +83,7 @@
         - sudoers.{{ansible_date_time.iso8601}}
 
     - name: Remove old /etc/sudoers.d/ files
-      action: raw /bin/rm -f /etc/sudoers.d/*_[!iconrad]
+      action: raw /bin/rm -f /etc/sudoers.d/*_[!ansible]
 
     - name: deploy /etc/sudoers.d/ files
       action: copy src=/opt/repo/local/sudoers.d/{{item}} dest=/etc/sudoers.d/{{item}} mode=0440 owner=root group=root
@@ -91,9 +91,7 @@
         - 000_sysadmins
         - 001_ssh-users
         - 100_oracle
-        - 101_discovernow
-        - 500_deberhart
-        - 999_iconrad
+        - 999_ansible
 
     - name: establish or confirm '#include /etc/sudoers.d' line
       lineinfile: backup=yes state=present dest=/etc/sudoers
@@ -120,9 +118,7 @@
         - 000_sysadmins
         - 001_ssh-users
         - 100_oracle
-        - 101_discovernow
-        - 500_deberhart
-        - 999_iconrad
+        - 999_ansible
       when: sudo_recency | search('1.8.2')
 
     - name: Execute sudoers rebuild on servers running old sudo versions
