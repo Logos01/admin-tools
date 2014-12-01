@@ -1,0 +1,122 @@
+- hosts: "{{ hosts }}"
+  sudo: yes
+
+  tasks:
+    - set_fact:
+        rpm_sudo_version: { 
+          stdout: 'ISNULL'
+        }
+        dpkg_sudo_version: {
+          stdout: 'ISNULL'
+        }
+
+    - name: Debug rpm_sudo_version
+      debug: msg="{{ rpm_sudo_version.stdout }}"
+      #" Highlight correction
+
+    - name: Obtain rpm sudoers version
+      action: command rpm -q sudo
+      register: rpm_sudo_version
+      ignore_errors: true
+
+    - name: Debug rpm_sudo_version
+      debug: msg="{{rpm_sudo_version.stdout}}"
+
+    - name: Debug dpkg_sudo_version
+      debug: msg="{{dpkg_sudo_version.stdout}}"
+
+    - name: Obtain dpkg sudoers version
+      action: shell "dpkg -s sudo | awk '/Version/ {print $2}'"
+      register: dpkg_sudo_version
+      when: rpm_sudo_version.stdout | search("ISNULL")
+      ignore_errors: true
+
+    - name: Redefine absent variables (dpkg)
+      set_fact: 
+        dpkg_sudo_version: { stdout: 'ISNULL' }
+      when: dpkg_sudo_version.stdout is not defined
+
+    - name: Redefine absent variables (rpm)
+      set_fact: 
+        rpm_sudo_version: { stdout: 'ISNULL' }
+      when: rpm_sudo_version.stdout is not defined
+
+    - name: Debug dpkg_sudo_version
+      debug: msg="{{dpkg_sudo_version.stdout}}"
+    
+    - name: Unify variables (rpm_stage)
+      action: set_fact sudo_version="{{ rpm_sudo_version.stdout }}"
+      #" Highlight correction
+      when: rpm_sudo_version.stdout != "ISNULL"
+      ignore_errors: true
+    - name: Unify variables (dpkg stage)
+      action: set_fact sudo_version="{{ dpkg_sudo_version.stdout }}"
+      #" Highlight correction
+      when: dpkg_sudo_version.stdout != "ISNULL"
+      ignore_errors: true
+
+    - name: determine version recency
+      delegate_to: localhost
+      action: raw echo -en "{{ sudo_version }} \n 1.8.2" | sort -V | head -n 1
+      register: sudo_recency
+
+    - name: recency variable cleanup
+      set_fact: 
+        sudo_recency: "{{ sudo_recency.stdout }}"
+
+    - name: print sudo package version
+      debug: msg="{{ sudo_recency }}"
+      #" Highlight correction
+
+    - name: Ensure /etc/sudoers.d exists
+      action: file path=/etc/sudoers.d owner=root group=root mode=0770 state=directory
+
+    - name: Ensure /var/backups exists
+      action: file path=/var/backups owner=root group=root mode=0755 state=directory
+
+    - name: Preserve original sudoers file
+      action: command /bin/cp /etc/sudoers /var/backups/sudoers.last
+      action: command touch /var/backups/{{item}}
+      action: raw ( grep -H '' /etc/sudoers ; grep -rH '' /etc/sudoers.d/ ; /bin/true ) >> /var/backups/{{item}}
+      with_items:
+        - sudoers.{{ansible_date_time.iso8601}}
+
+    - name: Remove old /etc/sudoers.d/ files
+      action: raw /bin/rm -f /etc/sudoers.d/*_[!ansible]
+
+    - name: deploy /etc/sudoers.d/ files
+      action: copy src=/opt/repo/local/sudoers.d/{{item}} dest=/etc/sudoers.d/{{item}} mode=0440 owner=root group=root
+      with_items:
+        - 000_sysadmins
+        - 001_ssh-users
+        - 100_oracle
+        - 101_discovernow
+        - 999_ansible
+
+    
+    - name: establish or confirm '#include /etc/sudoers.d' line
+      lineinfile: backup=yes state=present dest=/etc/sudoers
+                  regexp='^#includedir /etc/sudoers.d' backrefs=yes
+                  line='#includedir /etc/sudoers.d'
+
+    - name: establish or confirm '%wheel ALL=(ALL)  ALL' line
+      lineinfile: backup=yes state=present dest=/etc/sudoers
+                  regexp='^# %wheel[\s+]ALL=\(ALL\)[\s+]ALL' backrefs=yes
+                  line='%wheel ALL=(ALL)    ALL'
+
+
+    - name: push configs to necessary location for older sudoers versions
+      action: shell "sed '/000_sysadmins/ q' /etc/sudoers > /tmp/sudoers_clean"
+      when: sudo_recency | search('1.8.2')
+      action: shell "echo 'cat /tmp/sudoers_clean > /etc/sudoers' > /tmp/sudoers_rebuild"
+      when: sudo_recency | search('1.8.2')
+      action: shell "echo 'cat /etc/sudoers.d/{{ item }} >> /etc/sudoers' >> /tmp/sudoers_rebuild"
+      with_items:
+        - 000_sysadmins
+        - 001_ssh-users
+        - 100_oracle
+        - 101_discovernow
+        - 999_ansible
+      when: sudo_recency | search('1.8.2')
+      action: shell "/bin/sh /tmp/sudoers_rebuild"
+      when: sudo_recency | search('1.8.2')
