@@ -41,7 +41,8 @@ def obtain_data():
                 host_inventory
                 ON
                     host_groups.hostname = host_inventory.hostname
-                WHERE host_inventory.row_is_obsolete IS false
+                WHERE
+                    host_inventory.row_is_obsolete IS false
     ''')
     host_groups = cur.fetchall()
     cur.execute('''
