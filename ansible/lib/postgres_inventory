@@ -31,11 +31,39 @@ def obtain_data():
     cur = conn.cursor()
     cur.execute('SELECT name, parent FROM groups')
     groups = cur.fetchall()
-    cur.execute('SELECT hostname, groupname FROM host_groups')
+    cur.execute('''
+        SELECT
+            host_groups.hostname,
+            host_groups.groupname
+        FROM
+            host_groups
+            INNER JOIN
+                host_inventory
+                ON
+                    host_groups.hostname = host_inventory.hostname
+                WHERE host_inventory.row_is_obsolete IS false
+    ''')
     host_groups = cur.fetchall()
-    cur.execute('SELECT groupname, var_name, var_value FROM group_vars')
+    cur.execute('''
+        SELECT
+            groupname,
+            var_name,
+            var_value
+        FROM
+            group_vars
+    ''')
     group_vars = cur.fetchall()
-    cur.execute('SELECT hostname, ipaddr, in_dns, online from host_inventory')
+    cur.execute('''
+        SELECT
+            hostname,
+            ipaddr,
+            in_dns,
+            online
+        FROM
+            host_inventory
+        WHERE
+            row_is_obsolete=false
+    ''')
     host_inventory = cur.fetchall()
     return (groups, host_groups, group_vars, host_inventory)
 
