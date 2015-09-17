@@ -164,9 +164,6 @@ net.ipv6.conf.all.disable_ipv6=1 ''' >> /etc/sysctl.conf
 #'''
 sed -i '/AddressFamily/s/.*/AddressFamily inet/' /etc/ssh/sshd_config
 
-[ -f /etc/centrify/ssh/sshd_config ] && \
-sed -i '/AddressFamily/s/.*/AddressFamily inet/' /etc/centrify/ssh/sshd_config
-
 #CIS 4.5.3 -> Verify Permissions on /etc/hosts.allow
 [ -f /etc/hosts.allow ] && chmod 0644 /etc/hosts.allow
 #CIS 4.5.5 -> Verify Permissions on /etc/hosts.deny
@@ -243,7 +240,7 @@ sed -i '/Banner/s/.*/Banner \/etc\/issue/' /etc/ssh/sshd_config
 /usr/sbin/addgroup -g 503 blacklist
 /usr/sbin/addgroup -g 504 anonymous
 
-/usr/sbin/useradd -u 1001 -c "Local_Sysadmin_Account_for_Ian_Conrad" -G l_sysadmins,ssh-users -m -p '<<L_SYSADMIN_PASS_HASH>>' l_sysadmin
+/usr/sbin/useradd -u 1001 -c "Local_Sysadmin_Account" -G l_sysadmins,ssh-users -m -p '<<L_SYSADMIN_PASS_HASH>>' l_sysadmin
 
 #CIS 6.3.1 -> Upgrade Password Hashing Algorithm to SHA-512
 /sbin/authconfig --passalgo=sha512 --update
