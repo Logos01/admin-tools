@@ -1,0 +1,47 @@
+*filter
+:INPUT                   ACCEPT [0:0]
+:FORWARD                 ACCEPT [0:0]
+:OUTPUT                  ACCEPT [0:0]
+:ALL                     -      [0:0]
+:LO                      -      [0:0]
+:TCP                     -      [0:0]
+:UDP                     -      [0:0]
+:OTHER                   -      [0:0]
+:LOGNDROP                -      [0:0]
+:LOGNACCEPT		 -      [0:0]
+
+-A INPUT						-j ALL
+-A FORWARD						-j ALL
+
+-A ALL -m state --state ESTABLISHED,RELATED					-j ACCEPT
+-A ALL -m state --state INVALID							-j DROP
+-A ALL -p icmp --icmp-type any							-j ACCEPT
+-A ALL --fragment								-j DROP
+-A ALL -i lo									-j LO
+-A ALL -m state --state NEW -m tcp -p tcp					-j TCP
+-A ALL -m state --state NEW -m udp -p udp					-j UDP
+-A ALL -p 50									-j LOGNACCEPT
+-A ALL -p 51                    			   			-j LOGNACCEPT
+-A ALL										-j LOGNDROP
+
+-A TCP -m tcp -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m limit --limit 1/s	-j LOGNACCEPT
+-A TCP -m tcp -p tcp 	--dport 22						-j ACCEPT
+-A TCP -m tcp -p tcp	--dport 25						-j ACCEPT
+-A TCP										-j LOGNDROP
+
+-A UDP -m udp -p udp 	--dport 123						-j ACCEPT
+-A UDP										-j LOGNDROP
+
+-A LO -m tcp -p tcp 	--dport 22						-j ACCEPT
+-A LO -m tcp -p tcp	--dport 25						-j ACCEPT
+-A LO										-j LOGNACCEPT
+
+
+-A LOGNACCEPT 	-m limit --limit 10/min		-j LOG --log-prefix "IPTABLES-ACCEPT: " --log-level 7
+-A LOGNACCEPT 	-j ACCEPT
+
+-A LOGNDROP	-m limit --limit 10/min		-j LOG --log-prefix "IPTABLES-REJECT: " --log-level 7
+-A LOGNDROP 	-j REJECT --reject-with icmp-host-prohibited
+
+COMMIT
+
