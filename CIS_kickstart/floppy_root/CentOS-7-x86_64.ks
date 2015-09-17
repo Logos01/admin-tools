@@ -127,7 +127,7 @@ BASEARCH=$(uname -i)
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum -y install rhn-client-tools rhn-check rhn-setup rhnsd m2crypto yum-rhn-plugin
 rpm -Uvh http://<<SPACEWALK-SERVER-URL>>/pub/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm
-rhnreg_ks --serverUrl=https://<<SPACEWAL-SERVER-URL>>/XMLRPC --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT --activationkey=1-centos7-x86_64
+rhnreg_ks --serverUrl=https://<<SPACEWALK-SERVER-URL>>/XMLRPC --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT --activationkey=1-centos7-x86_64
 
 #CIS 1.3.2 -> Enable periodic invocation of AIDE daemon.
 echo '#Ansible: run_aide_daemon' >> /var/spool/cron/root
