@@ -1,0 +1,5 @@
+#CIS 5.2.9 -> Collect Session Initiation Information
+-w /var/run/utmp -p wa -k session
+-w /var/log/wtmp -p wa -k session
+-w /var/log/btmp -p wa -k session
+

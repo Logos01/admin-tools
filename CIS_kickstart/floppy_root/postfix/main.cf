@@ -118,7 +118,7 @@ smtp_tls_security_level = may
 inet_interfaces = localhost
 
 # Enable IPv4, and IPv6 if supported
-inet_protocols = all
+inet_protocols = ipv4
 
 # The proxy_interfaces parameter specifies the network interface
 # addresses that this mail system receives mail on by way of a
@@ -322,7 +322,7 @@ mynetworks_style = host
 #relayhost = uucphost
 #relayhost = [an.ip.add.ress]
 
-relayhost = <<INTERNAL_SMTP_RELAY_HOST>>
+relayhost = <<RELAYHOST>>
 
 # REJECTING UNKNOWN RELAY USERS
 #
@@ -360,7 +360,7 @@ relayhost = <<INTERNAL_SMTP_RELAY_HOST>>
 # The ADDRESS_REWRITING_README document gives information about
 # address masquerading or other forms of address rewriting including
 # username->Firstname.Lastname mapping.
-masquerade_domains = <<MASQUERADE_DOMAIN_LIST>>
+masquerade_domains = <<MASQUERADE_DOMAINS>>
 
 # ADDRESS REDIRECTION (VIRTUAL DOMAIN)
 #

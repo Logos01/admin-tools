@@ -1,0 +1,2 @@
+#CIS 5.2.18 -> Make the Audit Configuration Immutable
+-e 2
