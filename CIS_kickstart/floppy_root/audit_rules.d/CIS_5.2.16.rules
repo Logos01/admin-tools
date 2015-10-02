@@ -1,0 +1,2 @@
+#CIS 5.2.16 -> Collect System Administrator Actions
+-w /var/log/sudo.log -p wa -k actions

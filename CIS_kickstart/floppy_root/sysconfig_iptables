@@ -29,11 +29,14 @@
 -A TCP -m tcp -p tcp	--dport 25						-j ACCEPT
 -A TCP										-j LOGNDROP
 
+-A UDP -m udp -p udp	-m multiport	--dports 67:68				-j DROP
 -A UDP -m udp -p udp 	--dport 123						-j ACCEPT
+-A UDP -m udp -p udp	-m multiport	--dports 135:139			-j DROP
 -A UDP										-j LOGNDROP
 
 -A LO -m tcp -p tcp 	--dport 22						-j ACCEPT
 -A LO -m tcp -p tcp	--dport 25						-j ACCEPT
+-A LO -m udp -p udp	--dport 123						-j ACCEPT
 -A LO										-j LOGNACCEPT
 
 
