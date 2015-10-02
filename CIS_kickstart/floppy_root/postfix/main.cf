@@ -322,7 +322,7 @@ mynetworks_style = host
 #relayhost = uucphost
 #relayhost = [an.ip.add.ress]
 
-relayhost = <<RELAYHOST>>
+relayhost = smtp.ex-logos.com
 
 # REJECTING UNKNOWN RELAY USERS
 #
@@ -360,7 +360,7 @@ relayhost = <<RELAYHOST>>
 # The ADDRESS_REWRITING_README document gives information about
 # address masquerading or other forms of address rewriting including
 # username->Firstname.Lastname mapping.
-masquerade_domains = <<MASQUERADE_DOMAINS>>
+masquerade_domains = ex-logos.com
 
 # ADDRESS REDIRECTION (VIRTUAL DOMAIN)
 #

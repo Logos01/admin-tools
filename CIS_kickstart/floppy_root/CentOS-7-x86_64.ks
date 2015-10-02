@@ -129,27 +129,29 @@ network	--device eth0 \
 
 
 %post --logfile=/mnt/sysimage/root/post_log.1
+echo '''
+#Ansible: daily_logrotate
+0 0 * * * /usr/sbin/logrotate /etc/logrotate.conf
+#Ansible: daily_auditd_logrotate
+0 0 * * * /etc/cron.daily/auditd-rotate.sh
+''' >> /var/spool/cron/root
+
+
 #CIS 1.1.17 -> Set stickybit on all world-writable directories.
 df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | xargs chmod a+t
 
 #CIS 1.2 -> Configure system updates.
 #Configure system to use Spacewalk server.
-rpm -Uvh http://yum.spacewalkproject.org/2.3-client/RHEL/7/x86_64/spacewalk-client-repo-2.3-2.el7.noarch.rpm
-BASEARCH=$(uname -i)
-rpm -Uvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-yum -y install rhn-client-tools rhn-check rhn-setup rhnsd m2crypto yum-rhn-plugin
-rpm -Uvh http://<<SPACEWALK_SERVER_FQDN>>/pub/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm
-rhnreg_ks --serverUrl=https://<<SPACEWALK_SERVER_FQDN>>/XMLRPC --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT --activationkey=1-centos7-x86_64
+#rpm -Uvh http://yum.spacewalkproject.org/2.3-client/RHEL/7/x86_64/spacewalk-client-repo-2.3-2.el7.noarch.rpm
+#BASEARCH=$(uname -i)
+#rpm -Uvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#yum -y install rhn-client-tools rhn-check rhn-setup rhnsd m2crypto yum-rhn-plugin
+#rpm -Uvh http://<<SPACEWALK_SERVER_FQDN>>/pub/rhn-org-trusted-ssl-cert-1.0-1.noarch.rpm
+#rhnreg_ks --serverUrl=https://<<SPACEWALK_SERVER_FQDN>>/XMLRPC --sslCACert=/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT --activationkey=1-centos7-x86_64
 
 #CIS 1.3.2 -> Enable periodic invocation of AIDE daemon.
 echo '#Ansible: run_aide_daemon' >> /var/spool/cron/root
-echo '0 5 * * * /usr/sbin/aide --check' >> /var/spool/cron/root
-
-#CIS 1.6.2 -> Enable Randomized Virtual Memory Region Placement
-echo '''
-#CIS 1.6.2 -> Enable Randomized Virtual Memory Region Placement
-kernel.randomize_va_space = 2
-''' >> /etc/sysctl.conf
+echo '0 5 * * * /usr/sbin/aide --check >/dev/null' >> /var/spool/cron/root
 
 #CIS 1.7 -> Use latest OS release
 yum clean all ; yum update -y
@@ -166,15 +168,7 @@ umask 027
 #CIS 3.16 -> Configure Postfix daemon
 /sbin/chkconfig postfix on
 
-#CIS 4.4 -> IPv6
-echo '''
-#IPv6 Disabling
-net.ipv6.conf.all.disable_ipv6=1 ''' >> /etc/sysctl.conf
-#'''
 sed -i '/AddressFamily/s/.*/AddressFamily inet/' /etc/ssh/sshd_config
-
-[ -f /etc/centrify/ssh/sshd_config ] && \
-sed -i '/AddressFamily/s/.*/AddressFamily inet/' /etc/centrify/ssh/sshd_config
 
 #CIS 4.5.3 -> Verify Permissions on /etc/hosts.allow
 [ -f /etc/hosts.allow ] && chmod 0644 /etc/hosts.allow
@@ -253,7 +247,7 @@ sed -i '/Banner/s/.*/Banner \/etc\/issue/' /etc/ssh/sshd_config
 /usr/sbin/groupadd -g 503 blacklist
 /usr/sbin/groupadd -g 504 anonymous
 
-/usr/sbin/useradd -u 1001 -c "Local_Sysadmin_Account" -G l_sysadmins,ssh-users -m -p '<<SYSADMIN_PASSWORD_HASH>>' l_sysadmin
+/usr/sbin/useradd -u 1001 -c "Local_Sysadmin_Account" -G l_sysadmins,ssh-users -m -p '$1$SkiSJlUp$w8j0MLPMQd1DKoO1jNkE41' l_sysadmin
 
 #CIS 6.5 -> Restrict Access to the su Command
 sed -i '/auth       required   pam_wheel.so/s/.*/auth       required   pam_wheel.so/' /etc/pam.d/su
@@ -265,6 +259,13 @@ echo 'umask 077' >> /etc/profile.d/cis.sh
 #CIS 7.5 -> Lock Inactive User Accounts
 echo '#Ansible: lock_inactive_users' >> /var/spool/cron/root
 echo '0 0 * * * /usr/sbin/useradd -D -f 35' >> /var/spool/cron/root
+
+
+
+#CIS 5.2.12 -> Collect Use of Privileged Commands
+mkdir -p /etc/audit/rules.d
+echo '#CIS 5.2.12 -> Collect Use of Privileged Commands' > /etc/audit/rules.d/CIS_5.2.12.rules
+find / \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F  auid>=1000 -F auid!=4294967295 -k privileged" }' >> /etc/audit/rules.d/CIS_5.2.12.rules
 
 %end
 
@@ -310,7 +311,6 @@ mkdir -p /mnt/sysimage/etc/audit/
 mkdir -p /mnt/sysimage/etc/audit/rules.d
 cp /tmp/floppy/auditd.conf /mnt/sysimage/etc/audit/auditd.conf
 cp -a /tmp/floppy/audit_rules.d/. /mnt/sysimage/etc/audit/rules.d/
-find /mnt/sysimage \( -perm -4000 -o -perm -2000 \) -type f | awk '{print "-a always,exit -F path=" $1 " -F perm=x -F  auid>=1000 -F auid!=4294967295 -k privileged" }' >> /mnt/sysimage/etc/audit/rules.d/CIS_5.2.12.rules
 
 mkdir -m 0750 -p /mnt/sysimage/etc/sudoers.d
 cp /tmp/floppy/l_sysadmins_sudoers /mnt/sysimage/etc/sudoers.d/999_l_sysadmins
@@ -332,7 +332,7 @@ for user in ${users[@]} ; do
         chmod 0600 /mnt/sysimage/home/${user}/.ssh/authorized_keys
         user_id=$(awk -F':' "/${user}/ {print \$3}" /mnt/sysimage/etc/passwd)
         chown -R ${user_id}:${user_id} /mnt/sysimage/home/${user}
-        echo -en 'from=<<ADMIN_HOST_IP>>, ' >> /mnt/sysimage/root/.ssh/authorized_keys
+        echo -en 'from=192.168.1.* ' >> /mnt/sysimage/root/.ssh/authorized_keys
         cat /tmp/floppy/pubkeys/${user}.pub >> /mnt/sysimage/root/.ssh/authorized_keys
     fi
 done
@@ -359,6 +359,10 @@ cp /tmp/floppy/etc_issue /mnt/sysimage/etc/issue
 ( cd /mnt/sysimage/etc ; ln -s issue motd )
 chown 0:0 /mnt/sysimage/etc/issue
 chmod 0644 /mnt/sysimage/etc/issue
+
+cp /tmp/floppy/auditd-rotate.sh /mnt/sysimage/etc/cron.daily/auditd-rotate.sh
+chown 0:0 /mnt/sysimage/etc/cron.daily/auditd-rotate.sh
+chmod 0644 /mnt/sysimage/etc/cron.daily/auditd-rotate.sh
 
 %end
 
