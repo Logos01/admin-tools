@@ -3,11 +3,15 @@
  Certificate Authority configuration and generation script.
  Based on https://jamielinux.com/docs/openssl-certificate-authority
 
+Locate and De-Tokenize all tokenized values before using.
+
+    find . -type f -exec grep -H '<<.*>>' \;
  
 
  Requires a functional Root and Intermediate CA Certificate
 
  With co-distributed files, execute the following commands to achieve this.
+ 
 
     basedir="/var/cert_auth"
     mkdir -p ${basedir}
