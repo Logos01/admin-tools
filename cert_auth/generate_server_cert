@@ -18,14 +18,15 @@ if [ $# -eq 1 ] ; then
     fi
 fi
 
-while getopts "xvhs:c:d:" opt ; do
+while getopts "xvhs:c:d:i:" opt ; do
     case ${opt} in
         x) opt_x=1 ;;
         v) opt_v=1 ;;
         h) opt_h=1 ;;
         s) opt_s=${OPTARG} ;;
-        d) opt_c=${OPTARG} ;;
-        f) opt_d=${OPTARG} ;;
+        c) opt_c=${OPTARG} ;;
+        d) opt_d=${OPTARG} ;;
+        i) opt_i=${OPTARG} ;;
     esac
 done
 
@@ -51,6 +52,10 @@ Usage:
         Generates a <<COMMONNAME>>.<<TLD>> certificate
         Uses local Intermediate CA Cert.
         Adds a SubjectAlternativeName (SAN) for each <<ALTNAMEn>>	
+    $0 -i <<IPADDR1>>,<<IPADDR2>> -c <<COMMONNAME>>
+        Generates a <<COMMONNAME>>.<<TLD>> certificate
+	Uses local Intermediate CA Cert.
+	Adds a SubjectAlternativeName (SAN) for each <<IPADDRn>>
 
     Flags may be mixed as needed. -c is *MANDATORY*
     'COMMONNAME' is the 'hostname' of the certificate.
@@ -119,6 +124,15 @@ function genconf(){
 	    n=$(( $n + 1 ))
 	    echo "DNS.${n} = ${san}" >> "${confdir}/${fqdn}.openssl.cnf"
 	done
+        unset IFS
+    fi
+    if [ "${opt_i}" ]; then
+	n=0
+        IFS=,
+        for ipaddr in ${opt_i} ; do
+            n=$(( $n + 1 ))
+            echo "IP.${n} = ${ipaddr}" >> "${confdir}/${fqdn}.openssl.cnf"
+        done
         unset IFS
     fi
 }
