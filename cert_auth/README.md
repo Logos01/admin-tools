@@ -36,4 +36,4 @@ Locate and De-Tokenize all tokenized values before using.
      /var/cert_auth/intermediate/confs/
      
 All generated files will follow the naming convention:
-    <<COMMONNAME>>.<<DOMAIN.TLD>>.<<TYPE>> (where TYPE could be "openssl.cnf" or "cert.pem" or "key.pem" or "csr.pem")
+    "<<COMMONNAME>>.<<DOMAIN.TLD>>.<<TYPE>>" (where TYPE could be "openssl.cnf" or "cert.pem" or "key.pem" or "csr.pem")
