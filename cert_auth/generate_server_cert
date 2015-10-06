@@ -113,6 +113,7 @@ password="<<SUPARSEKRITPASSWORD>>"
 
 function genconf(){
     cp "${intdir}/template.openssl.cnf" "${confdir}/${fqdn}.openssl.cnf"
+    #DO NOT DE-TOKENIZE THE SED COMMAND BELOW THIS LINE
     sed -i "/<<COMMONNAME>>/s/<<COMMONNAME>>/${fqdn}/" "${confdir}/${fqdn}.openssl.cnf"
     echo '' >> "${confdir}/${fqdn}.openssl.cnf"
     echo '[alt_names]' >> "${confdir}/${fqdn}.openssl.cnf"
