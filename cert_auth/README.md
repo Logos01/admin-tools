@@ -15,7 +15,9 @@ Locate and De-Tokenize all tokenized values before using.
 
     basedir="/var/cert_auth"
     mkdir -p ${basedir}
-    rsync -rv <<ADMIN-TOOLS/cert_auth>>/. /var/cert_auth/
+    rsync -rv <<ADMIN-TOOLS/cert_auth>>/. ${basedir}
+
+    password="<<SUPARSEKRITPASSWORD>>"
 
     cd ${basedir}
 
