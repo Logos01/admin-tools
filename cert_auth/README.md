@@ -63,7 +63,7 @@ Locate and De-Tokenize all tokenized values before using.
         -days 3650 \
         -notext \
         -md sha256 \
-        -passin pass:${password}
+        -passin pass:${password} \
         -in intermediate/csr/intermediate.csr.pem \
         -out intermediate/certs/intermediate.cert.pem \
         -batch
