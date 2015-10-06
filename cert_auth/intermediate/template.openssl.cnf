@@ -90,6 +90,7 @@ localityName_default            = <<CITY>>
 0.organizationName_default      = <<ORG>>
 organizationalUnitName_default  = <<UNIT>>
 emailAddress_default            = <<EMAIL>>
+### DO NOT DETOKENIZE THE <<COMMONNAME>> IN THE LINE BELOW -- generate_server_cert handles this!
 commonName                      = <<COMMONNAME>>
 
 [ v3_ca ]
