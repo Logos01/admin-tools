@@ -44,7 +44,7 @@ Locate and De-Tokenize all tokenized values before using.
 
     openssl genrsa \
         -aes256 \
-        -passin pass:${password} \
+        -passout pass:${password} \
         -out intermediate/private/intermediate.key.pem 4096
 
     chmod 0400 intermediate/private/intermediate.key.pem
