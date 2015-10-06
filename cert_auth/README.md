@@ -38,7 +38,7 @@ Locate and De-Tokenize all tokenized values before using.
         -out certs/ca.cert.pem \
         -passin pass:${password}
 
-    <<FILL_IN_PROMPTS>>
+    #<<FILL_IN_PROMPTS>>
 
     chmod 0444 certs/ca.cert.pem
 
@@ -56,7 +56,7 @@ Locate and De-Tokenize all tokenized values before using.
         -key intermediate/private/intermediate.key.pem \
         -out intermediate/csr/intermediate.csr.pem
 
-    <<FILL_IN_PROMPTS>>
+    #<<FILL_IN_PROMPTS>>
 
     openssl ca -config ${basedir}/openssl.cnf \
         -extensions v3_intermediate_ca \
