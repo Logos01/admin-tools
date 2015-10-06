@@ -22,3 +22,18 @@ Locate and De-Tokenize all tokenized values before using.
     
     cd ${basedir}
     bash ./generate_root_certificate
+    
+ To actually generate signed certificates (and associated configs, CSR, and private keys), see:
+     /var/cert_auth/generate_server_cert -h
+ For further information.
+ Server certificates will be located in:
+     /var/cert_auth/intermediate/certs/
+ Server private keys will be located in:
+     /var/cert_auth/intermediate/private/
+ Server CSR (Certificate Signing Request) files will be located in:
+     /var/cert_auth/intermediate/csrs/
+ Server CSR-generating configs will be located in:
+     /var/cert_auth/intermediate/confs/
+     
+All generated files will follow the naming convention:
+    <<COMMONNAME>>.<<DOMAIN.TLD>>.<<TYPE>> (where TYPE could be "openssl.cnf" or "cert.pem" or "key.pem" or "csr.pem")
