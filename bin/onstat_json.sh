@@ -2,8 +2,8 @@
 
 source /usr/local/bin/Informix_profile
 
-RAWFILE="/tmp/SERVERS$$.txt"
-JSONFILE="/tmp/SERVERS$$.json"
+RAWFILE="/tmp/ONSTAT$$.txt"
+JSONFILE="/tmp/ONSTAT$$.json"
 
 onstat -g dis > "${RAWFILE}"
 
