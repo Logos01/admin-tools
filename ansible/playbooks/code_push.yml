@@ -1,0 +1,154 @@
+- name: Define Global Variables
+  hosts: jbapp[1-8]*
+  gather_facts: false
+
+  tasks:
+
+  - name: Set Global Dictionary.
+    set_fact:
+      mundis: 
+        bundle_dir: "/opt/software/bundles"
+        jboss_bin: "/usr/local/jboss7/jboss-eap-6.3/bin"
+        subnet: "10.0.255.0/24"
+
+###############################################################################
+###############################################################################
+
+- name: Remove Servers From Loadbalancing Pool
+  hosts: jbapp[1-7]*:!jbapp4
+  gather_facts: false
+  sudo: yes
+
+  tasks:
+
+  - name: Check for iptables rule presence  on host
+    command: /sbin/iptables -L
+    register: iptables_out
+
+  - name: Execute iptables command on host
+    command: /sbin/iptables -A INPUT -s {{ mundis['subnet'] }} -p icmp -j DROP
+    when: "'{{ mundis['subnet'] }}' not in iptables_out.stdout"
+
+  - name: Wait for F5 Loadbalancers to release system
+    pause: seconds=30
+    when: "'{{ mundis['subnet'] }}' not in iptables_out.stdout"
+
+###############################################################################
+###############################################################################
+
+- name: Stage JBoss Code Release to Primary Server
+  hosts: jbapp1
+  serial: 1
+  max_fail_percentage: "0%"
+  gather_facts: false
+  sudo: yes
+
+  tasks:
+  
+  - name: Promote new codebase to primary server.
+    command: ./promote "{{ release }}"
+    args:
+      chdir: "{{ mundis['bundle_dir'] }}"
+    ignore_errors: true
+    register: deploy
+    failed_when: "'Please run setup-jboss on each of the following' not in deploy.stdout"
+
+###############################################################################
+###############################################################################
+
+- name: Deploy JBoss Code Release to Secondary Servers
+  hosts: jbapp[1-7]*:!jbapp4
+  serial: 3
+  max_fail_percentage: "40%"
+  gather_facts: false
+  sudo: yes
+
+  tasks:
+
+  - name: Bring down application server.
+    command: ./stop7
+    args:
+      chdir: "{{ mundis['jboss_bin'] }}"
+
+  - name: Deploy New Codebase
+    command: ./setup-jboss "{{ release }}"
+    args:
+      chdir: "{{ mundis['bundle_dir'] }}"
+    ignore_errors: true
+    register: deploy
+    failed_when: "'watch7' not in deploy.stdout"
+
+  - name: Bring up application server.
+    command: ./start7
+    args:
+      chdir: "{{ mundis['jboss_bin'] }}"
+
+  - name: Wait 4 minutes while application is starting.
+    pause: minutes=4
+
+  - name: Wait for application-instance to finish restarting.
+    shell: "egrep 'JBoss EAP .* started in [0-9]{5}.*ms' /usr/local/jboss7/jboss-eap-6.3/standalone/log/server.log | wc -l"
+    register: app_start
+    ignore_errors: true
+    until: "app_start.stdout|int > 0"
+    delay: 60
+    retries: 6
+
+  - name: Check to ensure application-instance restarted with proper version.
+    shell: 'wget -qO- "http://localhost:8080/security/dialtone.jsp" | grep "branch-t"'
+    register: version_check
+    failed_when: "'{{ release }}' not in version_check.stdout"
+
+###############################################################################
+###############################################################################
+
+- name: Restore Newly Upgraded JBoss Servers to Loadbalancer
+  hosts: jbapp[1-7]*:!jbapp4
+  gather_facts: false
+  serial: 7
+  max_fail_percentage: "50%"
+  sudo: yes
+
+  tasks:
+
+  - name: Check for iptables rule presence on host
+    command: /sbin/iptables -L
+    register: iptables_out
+
+  - name: Restore to F5 loadbalancing pool
+    command: /sbin/iptables -D INPUT -s {{ mundis['subnet'] }} -p icmp -j DROP
+    when: "'{{ mundis['subnet'] }}' in iptables_out.stdout"
+
+  - name: Wait for F5 Loadbalancers to acquire system.
+    pause: seconds=30
+    when: "'{{ mundis['subnet'] }}' in iptables_out.stdout"
+
+  - name: Confirm system is working properly.
+    shell: netstat -tunnap | grep ':8080'
+    register: netstat_evidence
+    failed_when: "'ESTABLISHED' not in netstat_evidence.stdout"
+    ignore_errors: true
+
+
+###############################################################################
+###############################################################################
+
+- name: Remove Legacy JBoss Servers from Loadbalancer.
+  hosts: jbapp4:jbapp8
+  gather_facts: false
+  serial: 2
+  max_fail_percentage: "0%"
+  sudo: yes
+  
+  tasks:
+
+  - name: Check for iptables rule presence on host
+    command: /sbin/iptables -L
+    register: iptables_out
+
+  - name: Remove from F5 loadbalancing pool
+    command: /sbin/iptables -A INPUT -s {{ mundis['subnet'] }} -p icmp -j DROP
+    when: "'{{ mundis['subnet'] }}' not in iptables_out.stdout"
+
+  - name: Wait for F5 Loadbalancer to release system.
+    pause: seconds=30
