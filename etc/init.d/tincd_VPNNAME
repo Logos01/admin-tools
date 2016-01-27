@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# tinc                  tincd VPN setup
+#
+# chkconfig:    2345 10 90
+#
+# version:      1.0.0
+# author:       logos <Logos01 @ irc.freenode.net >
+#
+#
+# Source function library
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+[ "x${NETWORKING}" = "xno" ] && exit 0
+
+VPN_NAME="<<PUT_A_VPN_NAME_HERE>>"
+
+TINCD_EXEC="/usr/sbin/tincd"
+TINCD_CONF="/etc/tinc/${VPN_NAME}"
+TINCD_PID="/var/run/tinc_${VPN_NAME}.pid"
+DEBUG=""
+#DEBUG="-d3"
+
+
+#Check for executable
+if [ ! -x ${TINCD_EXEC} ] ; then
+    echo "**tinc: ${TINCD_EXEC} does not exist or is not executable!" >&2
+fi
+
+_start() {
+    ${TINCD_EXEC} -n "${VPN_NAME}" ${DEBUG} --pidfile="${TINCD_PID}"
+}
+
+_stop() {
+    ${TINCD_EXEC} -n ${VPN_NAME} -k
+}
+
+_restart() {
+    _stop;
+    _start
+}
+
+_reload() {
+   /usr/bin/pgrep -SIGHUP -f "${TINCD_EXEC} -n ${VPN_NAME}"
+}
+
+_status() {
+   /usr/sbin/lsof -p $(/usr/bin/pgrep -f "${TINCD_EXEC} -n ${VPN_NAME}") | grep TCP
+}
+
+
+
+
+case "$1" in
+    start)
+        _start
+        ;;
+    stop)
+        _stop
+        ;;
+    reload)
+        _reload
+        ;;
+    restart)
+        _restart
+        ;;
+    reload)
+        _reload
+        ;;
+    status)
+        _status
+        ;;
+    *)
+        echo "Usage: service tincd_${VPN_NAME} {start|stop|reload|restart|status)"
+        exit 1
+esac
+
+exit 0
