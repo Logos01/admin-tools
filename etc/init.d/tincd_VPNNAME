@@ -48,7 +48,6 @@ _restart() {
 
 _reload() {
     tincd -n "${VPN_NAME}" --kill=HUP --pidfile="${TINCD_PID}"
-    /usr/bin/pkill -SIGHUP -f "${TINCD_EXEC} -n ${VPN_NAME}"
 }
 
 _status() {
