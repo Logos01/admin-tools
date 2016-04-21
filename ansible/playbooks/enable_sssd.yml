@@ -90,7 +90,7 @@
         replace: "{{ item.replace }}"
         backup: yes
       with_items:
-        - { regexp: 'not_a_real_user.*',     replace: "{{ allow_users[ansible_hostname]  | default('iconrad') }}" }
+        - { regexp: 'not_a_real_user.*',     replace: "{{ allow_users[ansible_hostname]  | default('logos') }}" }
         - { regexp: 'not_a_real_group.*',    replace: "{{ allow_groups[ansible_hostname] | default('') }}"        }
 
     - name: Obtain membership of ssh-users group
