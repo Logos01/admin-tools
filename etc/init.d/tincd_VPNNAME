@@ -1,11 +1,11 @@
 #!/bin/bash
 #
-# tinc			tincd VPN setup
+# tinc                  tincd VPN setup
 #
-# chkconfig:	2345 10 90
+# chkconfig:    2345 10 90
 #
-# version:	1.0.0
-# author:	logos <Logos01 @ irc.freenode.net >
+# version:      1.0.0
+# author:       logos <Logos01 @ irc.freenode.net >
 #
 #
 # Source function library
@@ -17,7 +17,7 @@
 # Check that networking is up.
 [ "x${NETWORKING}" = "xno" ] && exit 0
 
-VPN_NAME="<<VPN_NAME_GOES_HERE>>"
+VPN_NAME="<<PUT_A_VPN_NAME_HERE>>"
 
 TINCD_EXEC="/usr/sbin/tincd"
 TINCD_CONF="/etc/tinc/${VPN_NAME}"
@@ -25,34 +25,39 @@ TINCD_PID="/var/run/tinc_${VPN_NAME}.pid"
 DEBUG=""
 #DEBUG="-d3"
 
+alias tincd="${TINCD_EXEC}"
 
 #Check for executable
 if [ ! -x ${TINCD_EXEC} ] ; then
-    echo "**tinc: ${TINCD_EXEC} does not exist or is not executable!" >&2
+    echo "**tinc: tincd does not exist or is not executable!" >&2
 fi
 
 _start() {
-    ${TINCD_EXEC} -n "${VPN_NAME}" ${DEBUG} --pidfile="${TINCD_PID}"
+    tincd -n "${VPN_NAME}" ${DEBUG} --pidfile="${TINCD_PID}"
 }
 
 _stop() {
-    ${TINCD_EXEC} -n ${VPN_NAME} -k --pidfile="${TINCD_PID}"
+    tincd -n ${VPN_NAME} -k --pidfile="${TINCD_PID}"
 }
 
 _restart() {
     _stop;
+    sleep 0.5
     _start
 }
 
 _reload() {
-   ${TINCD_EXEC} -n "${VPN_NAME}" --kill=HUP --pidfile="${TINCD_PID}"
+    tincd -n "${VPN_NAME}" --kill=HUP --pidfile="${TINCD_PID}"
 }
 
 _status() {
-   /usr/sbin/lsof -p $(/usr/bin/pgrep -f "${TINCD_EXEC} -n ${VPN_NAME}") | grep TCP 
+    current_pid=$(/usr/bin/pgrep -f "${TINCD_EXEC} -n ${VPN_NAME}")
+    if [ "${current_pid}"] ; then
+        /usr/sbin/lsof -p "${current_pid}" | grep TCP
+    else
+        echo "tincd_${VPN_NAME} is not currently running."
+    fi
 }
-
-
 
 
 
