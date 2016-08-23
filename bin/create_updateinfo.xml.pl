@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# Stolen shamelessly from https://github.com/liedekef/spacewalk_scripts
 
 use strict;
 use warnings;

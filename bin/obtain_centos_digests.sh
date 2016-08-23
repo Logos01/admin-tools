@@ -1,4 +1,6 @@
 #!/bin/bash
+# Stolen shamelessly from https://github.com/liedekef/spacewalk_scripts
+
 ERRATADIR=/tmp/centos-errata
 [ -d $ERRATADIR ] && rm -f $ERRATADIR/* || mkdir $ERRATADIR
 
