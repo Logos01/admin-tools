@@ -1,0 +1,6 @@
+*/15 * * * *   /sbin/zfs get com.sun:auto-snapshot | awk '/autosnap/ && /false/ {print $1}' | /usr/bin/xargs -I{} /sbin/zfs destroy {}
+*/15 * * * *   /usr/sbin/zfSnap -d -p autosnap-frequent_  -a 1h  -r rpool
+0 * * * *      /usr/sbin/zfSnap -d -p autosnap-hourly_    -a 24h -r rpool
+0 0 * * *      /usr/sbin/zfSnap -d -p autosnap-daily_     -a 7d  -r rpool
+0 0 * * 1      /usr/sbin/zfSnap -d -p autosnap-weekly_    -a 1m  -r rpool
+0 0 1 * *      /usr/sbin/zfSnap -d -p autosnap-monthly_   -a 1y  -r rpool
