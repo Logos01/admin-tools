@@ -1,0 +1,44 @@
+<?php 
+#Show Error
+define('APP_SHOW_ERROR', {{ show_errors }} );
+
+@ini_set('display_errors', (APP_SHOW_ERROR) ? 'On' : 'Off');
+error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
+if(defined('E_DEPRECATED')) {
+error_reporting(error_reporting() & ~E_DEPRECATED);
+}
+define('SHOW_SQL_ERROR', APP_SHOW_ERROR);
+
+define('APP_VERSION', '{{ iwp_version }}' );
+define('APP_INSTALL_HASH', '{{ iwp_hash | default("fakehash") }}');
+
+define('APP_ROOT', dirname(__FILE__));
+define('APP_DOMAIN_PATH', '{{ app_domain_path | default( "{{ ansible_ssh_host }}" ) }}');
+# 1 => HTTPS on, 0 => HTTPS off
+define('CONFIG_HTTPS', {{ enable_https }} );
+
+$APP_URL = 'http'.(CONFIG_HTTPS == 1 ? 's' : '').'://'.APP_DOMAIN_PATH;
+define('APP_URL', $APP_URL);
+
+
+define('EXECUTE_FILE', 'execute.php');
+#Request to client wp
+define('DEFAULT_MAX_CLIENT_REQUEST_TIMEOUT', 180);
+
+$config = array();
+$config['SQL_DATABASE'] = '{{ database_name }}';
+$config['SQL_HOST'] = '{{ database_hostname }}';
+$config['SQL_USERNAME'] = '{{ database_username }}';
+$config['SQL_PASSWORD'] = '{{ database_password }}';
+$config['SQL_PORT'] = '{{ database_port }}';
+$config['SQL_TABLE_NAME_PREFIX'] = '{{ database_tablename_prefix | default("") }}';
+
+define('SQL_DRIVER', 'mysqli');
+
+session_name ('adminPanel');
+
+$timezone = ini_get('date.timezone');
+if ( empty($timezone) && function_exists( 'date_default_timezone_set' ) )
+    {     @date_default_timezone_set( @date_default_timezone_get() ); }
+
+?>

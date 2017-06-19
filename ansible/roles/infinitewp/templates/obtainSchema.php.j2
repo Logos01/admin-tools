@@ -1,0 +1,32 @@
+<?php
+
+$schemaFile = '{{ iwp_root }}/install/install.sql';
+$tableNamePrefix = '{{ database_tablename_prefix }}';
+
+function getInstallschemaQueries($schemaFile, $tableNamePrefix){
+        $tableEnv = "{{ table_env | default('ENGINE=InnoDB') }}";
+        $schemaQueries = setSQLEnvInQueries($schemaFile, $tableNamePrefix, $tableEnv);
+        return $schemaQueries;
+}
+
+function setSQLEnvInQueries($schemaFile, $tableNamePrefix, $tableEnv){
+        include $schemaFile;
+        return $schemaQueries;
+}
+
+$content = getInstallSchemaQueries($schemaFile, $tableNamePrefix);
+
+{% if settings_defined != "0" %}
+foreach($content as $key => $value) {
+    if (strpos($value, "updateNotifySentToJS" ) == false) {
+        if (strpos($value, "MAX_SIMULTANEOUS_REQUEST_PER_IP") == false) {
+            echo PHP_EOL . print_r($value, TRUE);
+        }
+    }
+}
+{% else %}
+foreach($content as $key => $value) {
+    echo PHP_EOL . print_r($value, TRUE);
+}
+{% endif %}
+

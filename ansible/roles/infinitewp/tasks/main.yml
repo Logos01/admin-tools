@@ -1,0 +1,140 @@
+---
+# tasks file for infinitewp
+#
+
+- name: Obtain header information  for current InfiniteWP release file.
+  uri:
+    method: HEAD
+    url: https://infinitewp.com/iwp-admin-panel-download.php
+  register: iwp_download_out
+
+- name: Filter iwp_filename from iwp_download_out.content_disposition
+  set_fact:
+    iwp_filename: "{{ iwp_download_out.content_disposition | regex_replace('.*filename=.{1}') | regex_replace('.{1};') }}"
+    iwp_dirname: "{{ iwp_download_out.content_disposition | regex_replace('.*filename=.{1}') | regex_replace('\\.zip.*') }}"
+    iwp_version: "{{ iwp_download_out.content_disposition | regex_replace('.*IWPAdminPanel_v') | regex_replace('\\.zip.*') }}"
+    iwp_hash: "{{ infinitewp_install_hashes[env_type | default('dev')] }}"
+
+
+- name: Obtain InfiniteWP installation files.
+  get_url:
+    url:  "{{ iwp_url }}"
+    dest: "/var/tmp/{{ iwp_filename }}"
+    owner: "nginx"
+    group: "nginx"
+
+- name: Ensure presence of "{{ iwp_root }}" and "/var/tmp/iwp_extract" directories
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0750') }}"
+    state: "{{ item.state | default('directory') }}"
+  with_items:
+    - { path: "{{ iwp_root }}", owner: "nginx", group: "nginx" }
+    - { path: "/var/tmp/iwp_extract"                           }
+
+- name: Extract InfiniteWP installation files.
+  unarchive:
+    src: "/var/tmp/{{ iwp_filename }}"
+    dest: "/var/tmp/iwp_extract/"
+    remote_src: True
+
+- name: Check if contents of "/var/tmp/iwp_extract/{{ iwp_dirname }}" need to be delivered to "{{ iwp_root }}"
+  shell: "rsync --dry-run -av --exclude='./' /var/tmp/iwp_extract/{{ iwp_dirname }}/. {{ iwp_root }} | egrep -v '(sending|sent|total|^$)'"
+  register: dryrun_rsync
+  changed_when: false
+
+- name: Ensure contents of "{{ iwp_filename }}" are present within "{{ iwp_root }}"
+  shell: "rsync -av --exclude='./' /var/tmp/iwp_extract/{{ iwp_dirname }}/. {{ iwp_root }} | egrep -v '(sending|sent|total|^$)'"
+  register: rsync
+  failed_when:
+    - rsync.rc != 0
+    - rsync.stdout != dryrun_rsync.stdout
+  changed_when:
+    - rsync.stdout | default('') != "./"
+  when: dryrun_rsync.stdout != "./"
+
+- name: Ensure deployed template-files comply with templated versions (and exist remotely).
+  template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
+    owner: "nginx"
+    group: "nginx"
+    mode: "0750"
+  with_items:
+    - { template: "templates/config.php.j2", dest: "{{ iwp_root }}/config.php" }
+    - { template: "templates/infinitewp2.sql.j2", dest: "/var/tmp/iwp_extract/infinitewp2.sql" }
+    - { template: "templates/tmp_my.cnf.j2",  dest: "/tmp/my.cnf" }
+
+- name: Determine if "{{ database_tablename_prefix }}settings" table is populated.
+  command: 'mysql --defaults-extra-file /tmp/my.cnf -h {{ database_hostname }} -u {{ database_username }} -sNe "SELECT COUNT(*) FROM {{  database_tablename_prefix }}settings;"'
+  register: settings_count
+  changed_when: false
+  failed_when: false
+
+- name: Filter settings_count into settings_defined
+  set_fact:
+    settings_defined: "{{ settings_count.stdout | default('0') }}"
+
+- name: Ensure "{{ iwp_root }}/installs/obtainSchema.php" exists remotely and complies with templating.
+  template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
+    owner: "nginx"
+    group: "nginx"
+    mode: "0750"
+  with_items:
+    - { template: "templates/obtainSchema.php.j2", dest: "{{ iwp_root }}/install/obtainSchema.php" }
+
+
+- name: Ensure "{{ iwp_dirname }}-infinitewp1.sql" file is present for db creation.
+  shell: "{{ item }}"
+  with_items:
+    - "php {{ iwp_root }}/install/obtainSchema.php > /var/tmp/iwp_extract/infinitewp1.sql"
+    - "sed -i 's/SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\"/SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\";/' /var/tmp/iwp_extract/infinitewp1.sql"
+  changed_when: true
+
+- name: Ensure "infinitewp2.sql" is present for stage-two db creation.
+  template:
+    src: templates/infinitewp2.sql.j2
+    dest: "/var/tmp/iwp_extract/infinitewp2.sql"
+    owner: root
+    group: root
+    mode: 0640
+
+- name: Rebuild infinitewp database
+  mysql_db:
+    login_user: "{{ database_username }}"
+    login_password: "{{ database_password }}"
+    login_host: "{{ database_hostname }}"
+    login_port: "{{ database_port }}"
+    name: "{{ database_name }}"
+    state: "import"
+    target: "{{ item }}"
+  delegate_to: "{{ inventory_hostname }}"
+  with_items:
+    - "/var/tmp/iwp_extract/infinitewp1.sql"
+    - "/var/tmp/iwp_extract/infinitewp2.sql"
+
+- name: Force rebuild of uploads/cache/*.css
+  command: "find {{ iwp_root }}/uploads/cache -type f -iname '*.css' -exec rm -f {} +"
+  args:
+    chdir: "{{ iwp_root }}"
+    
+
+#  shell: "mysql -u {{ database_username }} -p{{ database_password }} -h {{ database_hostname }} {{ database_name }} {{ item.cmd }}"
+#  no_log: "{{ item.nolog | default('false') }}"
+#  with_items:
+#    - { cmd: "< /var/tmp/iwp_extract/infinitewp.sql" }
+#    - { nolog: "false",
+#        cmd: "-sNe \\\"UPDATE `iwp_users` SET `email`='{{ admin_email }}', `password` = SHA1( '{{ admin_pass }}' ) WHERE `userID` =1;\\\""
+#      }
+
+- name: Display contents of iwp-download_out
+  debug:
+    msg: "{{ item }}"
+  with_items:
+    -  "{{ iwp_filename }}"
+    -  "{{ iwp_dirname }}"
+    -  "{{ rsync.stdout | default('skipped') }}"

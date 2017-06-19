@@ -1,0 +1,2 @@
+UPDATE `iwp_users` SET `email`='{{ admin_email }}', `password` = SHA1( '{{ admin_pass }}' ) WHERE `userID` =1;
+UPDATE `iwp_options` SET `optionValue` = 1 WHERE `optionName` = 'isInitialSetupCompleted';
