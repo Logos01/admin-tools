@@ -1,0 +1,195 @@
+#!/bin/bash
+###############################################################################
+#
+# generate_identity_cert
+# Written 2015-10-02 by Logos01 < Logos01 @ irc.freenode.net >
+#
+# Can be used to generate identity certificates against the local CA cert chain
+# See "usage" ( -h )
+#
+# LOOK FOR "<<.*>>" TO FIND ALL TOKENIZED PARAMETERS.
+#
+#
+###############################################################################
+
+if [ $# -eq 1 ] ; then
+    if $(echo $1 | grep -v -q '\-') ; then
+        opt_c=$1
+    fi
+fi
+
+while getopts "xvhs:c:d:i:" opt ; do
+    case ${opt} in
+        x) opt_x=1 ;;
+        v) opt_v=1 ;;
+        h) opt_h=1 ;;
+        s) opt_s=${OPTARG} ;;
+        c) opt_c=${OPTARG} ;;
+        d) opt_d=${OPTARG} ;;
+        i) opt_i=${OPTARG} ;;
+    esac
+done
+
+
+
+function usage(){
+    echo """
+Usage:
+    $0 -x
+        Debug mode -- uses xtrace ('set -x') 
+    $0 -v
+        Debug mode -- uses xtrace and '-verbose' for openssl calls
+    $0 -h
+        Prints this help message and exits.
+	Performs no other actions.
+    $0 -c <<COMMONNAME>>
+        Generates a <<COMMONNAME>> certificate.
+	Uses local Intermediate CA Cert.
+    $0 -d <<DOMAIN>>
+        Supplements -c.
+	Allows use of alternate toplevel domain.
+    $0 -s <<ALTNAME1>>,<<ALTNAME2>> -c <<COMMONNAME>>
+        Generates a <<COMMONNAME>>.<<TLD>> certificate
+        Uses local Intermediate CA Cert.
+        Adds a SubjectAlternativeName (SAN) for each <<ALTNAMEn>>	
+    $0 -i <<IPADDR1>>,<<IPADDR2>> -c <<COMMONNAME>>
+        Generates a <<COMMONNAME>>.<<TLD>> certificate
+	Uses local Intermediate CA Cert.
+	Adds a SubjectAlternativeName (SAN) for each <<IPADDRn>>
+
+    Flags may be mixed as needed. -c is *MANDATORY*
+    'COMMONNAME' is the 'hostname' of the certificate.
+    If only one argument is provided, it will be 'fed' to -c.
+   """
+}
+
+if [ "${opt_h}" == "1" ] ; then
+    usage
+    exit 0
+fi
+if [ "${opt_c}" == "" ] ; then
+    echo "No Hostname provided. Quitting."
+    exit 1
+fi
+
+if [ "${opt_d}" == "" ] ; then
+    opt_d='identity'
+fi
+
+if [ "${opt_x}" == "1" ]; then
+    set -x
+fi
+
+if [ "${opt_v}" == "1" ] ; then
+    set -x
+    verbose="-verbose"
+fi
+
+
+fqdn="${opt_c}.${opt_d}"
+
+basedir="/var/cert_auth"
+intdir="${basedir}/intermediate"
+confdir="${intdir}/confs"
+privdir="${intdir}/private"
+csrdir="${intdir}/csr"
+certdir="${intdir}/certs"
+
+
+mail="ian.conrad@ex-logos.com"
+
+
+subjstring="/C=US"
+subjstring="${subjstring}/ST=UT"
+subjstring="${subjstring}/L=SLC"
+subjstring="${subjstring}/O=ex-logos"
+subjstring="${subjstring}/OU=lab"
+subjstring="${subjstring}/CN=${fqdn}"
+subjstring="${subjstring}/emailAddress=${mail}"
+
+
+
+password="ex-logos.com"
+
+function genconf(){
+    cp "${intdir}/template.openssl.cnf" "${confdir}/${fqdn}.openssl.cnf"
+    #DO NOT DE-TOKENIZE THE SED COMMAND BELOW THIS LINE
+    sed -i "/<<COMMONNAME>>/s/<<COMMONNAME>>/${fqdn}/" "${confdir}/${fqdn}.openssl.cnf"
+    echo '' >> "${confdir}/${fqdn}.openssl.cnf"
+    echo '[alt_names]' >> "${confdir}/${fqdn}.openssl.cnf"
+    echo "DNS.1 = ${opt_c}" >> "${confdir}/${fqdn}.openssl.cnf"
+    if [ "${opt_s}" ]; then
+        n=1
+	IFS=,
+	for san in ${opt_s} ; do
+	    n=$(( $n + 1 ))
+	    echo "DNS.${n} = ${san}" >> "${confdir}/${fqdn}.openssl.cnf"
+	done
+        unset IFS
+    fi
+    if [ "${opt_i}" ]; then
+	n=0
+        IFS=,
+        for ipaddr in ${opt_i} ; do
+            n=$(( $n + 1 ))
+            echo "IP.${n} = ${ipaddr}" >> "${confdir}/${fqdn}.openssl.cnf"
+        done
+        unset IFS
+    fi
+}
+
+function genkey(){
+    openssl genrsa \
+        -out "${privdir}/${fqdn}.key.pem" \
+       	2048 \
+	${verbose}
+}
+
+function gencsr(){
+    openssl req \
+        -config   "${confdir}/${fqdn}.openssl.cnf" \
+	-key      "${privdir}/${fqdn}.key.pem" \
+	-new \
+	-sha256 \
+	-out      "${csrdir}/${fqdn}.csr.pem"\
+        -passin "pass:${password}" \
+	-subj "${subjstring}" \
+        -batch \
+	${verbose}
+}
+
+function gencert(){
+    openssl ca \
+        -config "${confdir}/${fqdn}.openssl.cnf" \
+	-extensions usr_cert \
+	-days ${days} \
+	-notext \
+	-md sha256 \
+	-in "${csrdir}/${fqdn}.csr.pem" \
+	-out "${certdir}/${fqdn}.cert.pem" \
+	-passin "pass:${password}" \
+        -batch \
+	${verbose}
+}
+
+function genpkcs12(){
+    openssl pkcs12 \
+        -export \
+        -out   ${certdir}/${fqdn}.pfx \
+        -inkey ${privdir}/${fqdn}.key.pem \
+        -in    ${certdir}/${fqdn}.cert.pem \
+        -certfile ${certdir}/ca-chain.cert.pem
+}
+
+
+function main(){
+    cd ${basedir}
+
+    genconf
+    genkey
+    gencsr
+    gencert
+    genpkcs12
+}
+
+main

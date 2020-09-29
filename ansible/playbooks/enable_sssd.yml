@@ -1,0 +1,170 @@
+- hosts: "{{ hosts }}"
+  become: true
+  gather_facts: true
+  vars:
+    - source_dir: "~/ansible/source_files"
+    - script_dir: "~/ansible/ansbin"
+    # ansible_ssh_pass is stored in encrypted vault file.
+    - ad_user: "{{ AD_USER | default('justsomedude') }}"
+    - ad_pass: "{{ AD_PASS | default('HESLIKEJUSTTHISGUYYOUKNOW') }}"
+    - allow_groups: {
+        infxsrv1: 'infxconsult',
+        infxrss1: 'infxconsult',
+        infxstg: 'qa, stage',
+        infxacpt: 'qa, acceptance, tempaccpt',
+        infx1: 'logaccess',
+        infxdev: 'developers',
+        xappprod1: 'qa',
+        xappprod2: 'qa',
+        drinfxsrv1: 'infxconsult',
+        jbdev: 'developers',
+        javadev: 'developers',
+        appdev1: 'developers, qa',
+        xappdev: 'developers',
+        xappstg: 'qa',
+        javaappdev1: 'developers, otherdevs, qa, tes',
+        appstg: 'qa',
+        mysqlacpt: 'qa',
+        nb1: 'backupadmin',
+        jbacpt2: 'qa',
+        jbacpt1: 'qa',
+        xappacpt: 'qa',
+        javaappacpt1: 'qa, tempaccpt, otherdevs',
+        appacpt1: 'qa, acceptance, acptmenu'
+      }
+    - allow_users: {
+       xappdev: 'flast1',
+       jbstg1: 'flast1, flast2, first.last3, first.last4',
+       jbstg2: 'flast1, flast2, first.last3, first.last4',
+       jbstg3: 'flast1, flast2, first.last3, first.last4',
+       jbstg4: 'flast1, flast2, first.last3, first.last4',
+       jbstg-cache1: 'flast1, flast2, first.last3, first.last4',
+       jbstg-cache2: 'flast1, flast2, first.last3, first.last4',
+       jbstg-cache3: 'flast1, flast2, first.last3, first.last4',
+       libretastg: 'flast1, flast2, first.last3, first.last4',
+       wwwstg: 'flast1, flast2, first.last3, first.last4'
+    }
+
+  tasks:
+
+    - name: Install necessary packages
+      yum: name={{ item }} update_cache=yes state=latest
+      with_items:
+        - sssd
+        - samba
+        - pam_krb5
+        - oddjob
+        - oddjob-mkhomedir
+        - krb5-workstation
+
+    - name: Check for presence of CentrifyDC RPMs
+      command: rpm -qa 'Centrify*'
+      register: centrify_rpms
+
+    - name: Revert from CentrifyDC to local authentication. (w/sensitive data)
+      command: "{{ item.execute }} {{ item.arg1 }} {{ item.arg2 }}"
+      with_items:
+        - { execute: '/usr/sbin/adleave', arg1: "-u {{ ad_user }}",        arg2: "-p {{ ad_pass }}" } 
+        - { execute: '/bin/cp -f',           arg1: '/etc/pam.d/sshd.cdcsave', arg2: '/etc/pam.d/sshd'  }
+      when: "'CentrifyDC' in centrify_rpms.stdout" 
+      no_log: true
+
+    - name: Remove CentrifyDC rpms.
+      yum: name={{ item }} state=absent
+      with_items: 
+        - "CentrifyDC"
+        - "CentrifyDC-openssh"
+      when: "'CentrifyDC' in centrify_rpms.stdout"
+
+    - name: Deploy Configuration files
+      copy: "owner=root group=root mode={{ item.mode }} src={{ source_dir }}/{{ item.file }} dest={{ item.dest }}"
+      with_items:
+        - { file: 'sssd.conf', dest: '/etc/sssd/sssd.conf', mode: '0600' }
+        - { file: 'krb5.conf', dest: '/etc/krb5.conf',      mode: '0644' }
+        - { file: 'smb.conf',  dest: '/etc/samba/smb.conf', mode: '0644' }
+
+    - name: Adjust allowed users and groups for system.
+      replace:
+        dest: /etc/sssd/sssd.conf
+        regexp: "{{ item.regexp }}"
+        replace: "{{ item.replace }}"
+        backup: yes
+      with_items:
+        - { regexp: 'not_a_real_user.*',     replace: "{{ allow_users[ansible_hostname]  | default('logos') }}" }
+        - { regexp: 'not_a_real_group.*',    replace: "{{ allow_groups[ansible_hostname] | default('') }}"        }
+
+    - name: Obtain membership of ssh-users group
+      shell: getent group ssh-users || echo 'no_such_group'
+      register: ssh_users
+
+    - name: Obtain groups permitted to ssh into system.
+      shell: "grep 'AllowGroups' /etc/ssh/sshd_config || echo 'no_such_directive'"
+      register: ssh_allowed_groups
+
+
+    - name: Ensure allowed users are in ssh-users group.
+      command: "usermod -aG ssh-users {{ item }}"
+      with_items: "{{ allow_users[ansible_hostname].split(',') | list }}"
+      when: "item is defined and ssh_users.stdout != 'no_such_group'"
+
+    - name: Create 'add_to_ssh' variable when 'allow_groups[ansible_hostname]' is defined.
+      shell: "echo '{{ allow_groups[ansible_hostname] | default('') }}' | sed 's/,//g'"
+      register: add_to_ssh
+
+    - name: Ensure allowed groups are permitted in SSH
+      replace:
+        dest: /etc/ssh/sshd_config
+        regexp:  "{{ ssh_allowed_groups.stdout }}"
+        replace: "{{ ssh_allowed_groups.stdout }} {{ add_to_ssh.stdout | default('') }}"
+        backup: yes
+      when: "'{{ allow_groups[ansible_hostname] | default('no_such_key') }}' != 'no_such_key'"
+
+
+    - name: Obtain current contents of /etc/hosts
+      command: cat /etc/hosts
+      register: hosts_file
+
+    - name: Ensure /etc/hosts has hostname entry (Needed for net ads join)
+      lineinfile:
+        dest: /etc/hosts
+        regexp: "^$"
+        line: "{{ ansible_default_ipv4.address }}     {{ ansible_hostname }}.domain.tld {{ ansible_hostname }}"
+      when: "'{{ ansible_default_ipv4.address }}     {{ ansible_hostname }}.domain.tld {{ ansible_hostname }}' not in hosts_file.stdout"
+
+    - name: Check if server is already joined to domain.
+      command: net ads testjoin -P
+      register: testjoin
+      ignore_errors: true
+
+    - name: Execute commands necessary to enable authentication (w/ sensitive data)
+      command: "{{ item }}"
+      with_items:
+        - net ads join -U {{ ad_user}}%{{ ad_pass }}
+      when: "'Join is OK' not in testjoin.stdout"
+      no_log: true
+
+    - name: Execute commands necessary to enable authentication
+      command: "{{ item }}"
+      with_items:
+        - net ads keytab create -P
+        - authconfig --enablesssd --enablesssdauth --enablemkhomedir --update
+      when: "'Join is OK' not in testjoin.stdout"
+
+    - name: Ensure services are running and enabled.
+      service: "name={{ item }} state=restarted enabled=true sleep=1"
+      with_items:
+        - sshd
+        - oddjobd
+        - sssd
+
+    - name: Cleanup unowned user files (stage1-> copy script in place.)
+      #Done to permit non-execute bit on /home and /tmp mountpoints.
+      copy: "src={{ script_dir}}/{{ item }} dest=/usr/local/bin/{{ item }} mode=0750 owner=root group=root"
+      with_items:
+        - "cleanup_unowned_files.sh"
+
+    - name: Cleanup unowned user files (stage2-> execute script.)
+      command: "/bin/bash /usr/local/bin/cleanup_unowned_files.sh"
+      register: cleanup
+      failed_when: cleanup.rc != 0
+

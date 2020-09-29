@@ -1,0 +1,20 @@
+{
+  "basic": {
+       "type": "haproxy",
+       "zone": "example.int.company.com",
+       "rrdns-name": "cache1"
+     },
+  "nodes": [
+      "cache1-node1",
+      "cache1-node2"
+    ],
+  "tcp": {
+      "port": 6379,
+      "message":  "PING\n\rQUIT\n\r",
+      "result": "PONG"
+    },
+  "dns-values": {
+    "cache1-node1": {"Value": "1.2.3.4"},
+    "cache1-node2": {"Value": "1.2.4.5"}
+    }
+}

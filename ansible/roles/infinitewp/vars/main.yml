@@ -1,0 +1,33 @@
+---
+# vars file for infinitewp
+#
+
+iwp_url:  "https://infinitewp.com/iwp-admin-panel-download.php"
+iwp_root: "/var/www/html/iwp"
+
+show_errors: "true"
+
+app_root: ""
+app_domain_path: "localvm1.local.xyz/iwp/"
+
+enable_https: 1
+
+percona_version: "57"
+
+database_name: "infinitewp"
+database_hostname: "127.0.0.1"
+database_username: "iwp"
+database_password: "<DB_PASS>"
+database_port: "3306"
+database_tablename_prefix: "iwp_"
+
+admin_email: "<<ADMIN_EMAIL>>"
+admin_pass: "<<ADMIN_PASS>>"
+
+infinitewp_install_hashes: {
+  dev: "d345da49668dbfc05d559e18e5d5975951fc41ac",
+  stage: "14a1f100f5662fa8712e71c8740e5d3fa55ff062",
+  prod: "d66a199fee0a16be4f5122d0c349626045bfa86a"
+}
+
+
