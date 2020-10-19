@@ -1,0 +1,4 @@
+User_Alias DEVS = %devs
+Defaults:DEVS    requiretty
+DEVS ALL=(ALL)   NOPASSWD: ALL
+

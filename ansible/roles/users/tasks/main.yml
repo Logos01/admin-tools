@@ -1,0 +1,119 @@
+---
+
+- name: Ensure necessary groups exist with the correct GIDs.
+  group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid }}"
+    state: "present"
+  with_items:
+    - { name: "ssh-users",      gid: "500" }
+    - { name: "l_sysadmins",    gid: "501" }
+    - { name: "blacklist",      gid: "502" }
+    - { name: "anonymous",      gid: "503" }
+  tags:
+    - groups
+    - users
+
+- name: Ensure presence of standardized sudoers configurations.
+  copy:
+    src: "files/etc/sudoers.d/"
+    dest: "/etc/sudoers.d/"
+    owner: "root"
+    group: "root"
+    mode: "0440"
+    validate: "visudo -cf %s"
+  tags:
+    - groups
+    - sudoers
+
+- name: Ensure Local Sysadmin Accounts exist with correct UIDs.
+  user:
+    name: "{{ item.name }}"
+    uid:  "{{ item.uid }}"
+    state: "present"
+    groups: "ssh-users,l_sysadmins"
+    expires: 1590000000
+  with_items:
+    - { name: "person0",       uid: "1001" }
+    - { name: "person1",      uid: "1002" }
+#    - { name: "person2",     uid: "1003" }
+    - { name: "person3",      uid: "1004" }
+    - { name: "person4",    uid: "1005" }
+  tags:
+    - users
+
+- name: Ensure Local Sysadmin Accounts exist with correct UIDs (Blog servers).
+  user:
+    name: "{{ item.name }}"
+    uid:  "{{ item.uid }}"
+    state: "present"
+    groups: "ssh-users,l_sysadmins"
+  with_items:
+    - { name: "blog0",      uid: "1008" }
+  when: which_environment == 'blog'
+
+- name: Ensure Standard (unprivileged) Accounts exist with correct UIDs.
+  user:
+    name: "{{ item.name }}"
+    uid:  "{{ item.uid }}"
+    groups: "ssh-users"
+    state: "present"
+  with_items:
+    - { name: "nonadmin0",      uid: "1101" }
+    - { name: "nonadmin1",      uid: "1102" }
+  tags:
+    - users
+
+- name: Ensure presence of 'default' authorized_key for default users.
+  authorized_key:
+    user: "{{ item }}"
+    key:  "{{ lookup('file', 'files/keys/{{ item }}') }}"
+  tags:
+    - users
+    - keys
+  with_items:
+    - person0
+    - person1
+#    - person2
+    - person3
+    - person4
+    - nonadmin0
+    - nonadmin1
+
+- name: Ensure password expiration time is maxed out (due to use of pubkeys rather than passwords).
+  command: "chage -M 9999 {{ item }}"
+  with_items:
+    - person0
+    - person1
+#    - person2
+    - person3
+    - person4
+    - nonadmin0
+    - nonadmin1
+  register: chage_out
+  changed_when: true
+
+- name: Force unlock of admin-user accounts.
+  command: "passwd -uf {{ item }}"
+  with_items:
+    - person0
+    - person1
+#    - person2
+    - person3
+    - person4
+  register: chage_out
+  changed_when: true
+
+- name: Ensure presence of 'default' authorized_key for default users (blog servers).
+  authorized_key:
+    user: "{{ item }}"
+    key: "{{ lookup('file', 'files/keys/{{ item }}') }}"
+  with_items:
+    - blog0
+  when: which_environment == 'blog'
+
+- name: Disable and lock expired user accounts.
+  command: "{{ item[0] }} {{ item[1] }}"
+  with_nested:
+    - [ 'usermod -L', 'passwd -l', 'chage -E0', 'usermod -s /sbin/nologin' ]
+    - [ 'person2' ]

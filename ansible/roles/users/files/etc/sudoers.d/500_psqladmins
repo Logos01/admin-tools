@@ -1,0 +1,12 @@
+User_Alias  PSQLADMINS = %psqladmins
+Cmnd_Alias  PSQLADMINS = /bin/systemctl start postgresql-9.6, /bin/systemctl stop postgresql-9.6, /bin/systemctl status postgresql-9.6, \
+            /bin/systemctl start pgpool, /bin/systemctl stop pgpool, /bin/systemctl status pgpool, \
+            /bin/pcp_attach_node *, /bin/pcp_detach_node *, /bin/pcp_node_count *, /bin/pcp_node_info *, \
+            /bin/pcp_pool_status *, /bin/pcp_proc_count *, /bin/pcp_promote_node *, /bin/pcp_recovery_node *, \
+            /bin/pcp_stop_pgpool *, /bin/pcp_watchdog_info *, /bin/pg_md5 *, /bin/pgpool *, \
+            /bin/chown -R postgres\:postgres /var/lib/pgsql, \
+            /bin/chown -R postgres\:postgres /media/ephemeral0/db-backups
+
+
+PSQLADMINS      ALL=(postgres)  NOPASSWD: ALL
+PSQLADMINS      ALL=(ALL)       NOPASSWD: PSQLADMINS

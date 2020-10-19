@@ -1,0 +1,4 @@
+User_Alias L_SYSADMINS = %l_sysadmins
+Defaults:L_SYSADMINS    !requiretty
+L_SYSADMINS ALL=(ALL)   NOPASSWD: ALL
+

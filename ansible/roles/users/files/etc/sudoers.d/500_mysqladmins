@@ -1,0 +1,16 @@
+User_Alias  MYSQLADMINS = %mysqldmins
+Cmnd_Alias  MYSQLCOMMANDS = /usr/sbin/service mysql stop, /usr/sbin/service mysql start, /usr/sbin/service mysql status, /usr/sbin/service mysql restart, \
+            /usr/bin/msql2mysql *, /usr/bin/mysql_embedded *, /usr/bin/mysql_secure_installation *, /usr/bin/mysql_zap *, /usr/bin/mysqlbug *, \
+            /usr/bin/mysqldumpslow *,  /usr/bin/mysqltest *, /usr/bin/mysql *, /usr/bin/mysql_find_rows *, /usr/bin/mysql_setpermission *, \
+            /usr/bin/mysqlaccess *, /usr/bin/mysqlcheck *, /usr/bin/mysqlhotcopy *, /usr/bin/pt-mysql-summary *, /usr/bin/mysql_config *, \
+            /usr/bin/mysql_fix_extensions *, /usr/bin/mysql_tzinfo_to_sql *, /usr/bin/mysqld_multi *, /usr/bin/mysqlimport *, /usr/bin/mysql_config_editor *, \
+            /usr/bin/mysql_install_db *, /usr/bin/mysql_upgrade *, /usr/bin/mysqladmin *, /usr/bin/mysqld_safe *, /usr/bin/mysqlshow *, \
+            /usr/bin/mysql_convert_table_format *, /usr/bin/mysql_plugin *, /usr/bin/mysql_waitpid *, /usr/bin/mysqlbinlog *, /usr/bin/mysqldump *, \
+            /usr/bin/mysqlslap *, /usr/local/sbin/mysqlfragfinder.sh *, /usr/sbin/mysqld *, /usr/sbin/mysqld-debug *, /usr/sbin/rcmysql *, \
+            /usr/local/bin/backup_database.sh, \
+            /bin/chown -R mysql\:mysql /var/lib/mysql, \
+            /bin/chown -R mysql\:mysql /media/ephemeral0/db-backups
+
+
+MYSQLADMINS    ALL=(mysql) NOPASSWD: ALL
+MYSQLADMINS    ALL=(ALL)   NOPASSWD: MYSQLCOMMANDS
